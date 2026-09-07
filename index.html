@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -366,6 +366,257 @@
             'Dominican Republic': 'República Dominicana', 'Puerto Rico': 'Puerto Rico'
         };
 
+        // Datos gastronomicos de los paises restantes: [capital, comida, descripcion]
+        const comidaExtra = {
+            'Afghanistan': ['Kabul', 'Kabuli Pulao', 'Arroz aromático con pasas, zanahoria y cordero, el plato nacional afgano.'],
+            'Albania': ['Tirana', 'Byrek', 'Pastel de masa fina relleno de espinaca, queso o carne.'],
+            'Algeria': ['Argel', 'Couscous', 'Sémola de trigo con verduras y cordero, comido los viernes.'],
+            'Andorra': ['Andorra la Vieja', 'Escudella', 'Estofado de montaña con garbanzos, botifarra y verduras.'],
+            'Angola': ['Luanda', 'Muamba de Galinha', 'Guiso de pollo con aceite de palma, okra y ajo.'],
+            'Antigua and Barbuda': ['Saint John\'s', 'Fungee and Pepperpot', 'Plato de harina de maíz con estofado de verduras y especias.'],
+            'Armenia': ['Ereván', 'Khorovats', 'Brochetas de cordero o cerdo a la parrilla con hierbas.'],
+            'Austria': ['Viena', 'Wiener Schnitzel', 'Milanesa de ternera empanada acompañada de ensalada de papa.'],
+            'Azerbaijan': ['Bakú', 'Plov', 'Arroz con azafrán, cordero, castañas y frutos secos.'],
+            'The Bahamas': ['Nasáu', 'Conch Salad', 'Ensalada fresca de caracol marino con cítricos y chile.'],
+            'Bahrain': ['Manama', 'Machboos', 'Arroz con especias, pollo o pescado, el plato nacional bareiní.'],
+            'Bangladesh': ['Daca', 'Hilsa Curry', 'Pescado hilsa en curry de mostaza, muy popular con arroz.'],
+            'Barbados': ['Bridgetown', 'Cou-Cou and Flying Fish', 'Masa de maíz con pescado volador al caldo.'],
+            'Belarus': ['Minsk', 'Draniki', 'Tortitas de papa rallada con crema agria.'],
+            'Belize': ['Belmopán', 'Rice and Beans', 'Arroz y frijoles con pollo al coco y salsa picante.'],
+            'Benin': ['Porto-Novo', 'Wagasi', 'Queso frito de vaca servido con arroz y salsa de tomate.'],
+            'Bhutan': ['Timbu', 'Ema Datshi', 'Pimiento picante y queso local, el platillo nacional butanés.'],
+            'Bosnia and Herzegovina': ['Sarajevo', 'Cevapi', 'Salchichas de carne picada servidas con pan somun y cebolla.'],
+            'Botswana': ['Gaborone', 'Seswaa', 'Carne de res cocida lentamente hasta deshacerse, con papilla de maíz.'],
+            'Brunei': ['Bandar Seri Begawan', 'Ambuyat', 'Sustancia de sagú comida con salsas de camarón o chile.'],
+            'Bulgaria': ['Sofía', 'Banitsa', 'Pastel de hojaldre con queso y huevo, tradicional del desayuno.'],
+            'Burkina Faso': ['Uagadugú', 'Tô', 'Pasta de mijo o sorgo servida con salsa de baobab.'],
+            'Burundi': ['Gitega', 'Ubugali na Ibiharage', 'Papilla de mandioca con frijoles rojos.'],
+            'Cabo Verde': ['Praia', 'Cachupa', 'Guiso de maíz, frijoles, yuca y carne o pescado.'],
+            'Cambodia': ['Nom Pen', 'Amok', 'Pescado al vapor en leche de coco con hojas de kroeung.'],
+            'Cameroon': ['Yaundé', 'Ndolé', 'Guiso de hojas amargas con maní y pescado ahumado.'],
+            'Central African Republic': ['Bangui', 'Maboké', 'Pescado o carne envueltos en hoja de plátano y asados.'],
+            'Chad': ['Yamena', 'Boule de Mil', 'Albóndigas de mijo acompañadas con salsa de maní.'],
+            'Colombia': ['Bogotá', 'Ajiaco', 'Sopa de papas con pollo, maíz y hierba guasca.'],
+            'Comoros': ['Moroni', 'Langouste à la vanille', 'Langosta con salsa de vainilla comorense.'],
+            'Republic of the Congo': ['Brazzaville', 'Saka Saka', 'Hojas de mandioca molidas con aceite de palma y pescado.'],
+            'Costa Rica': ['San José', 'Gallo Pinto', 'Arroz y frijoles mezclados, el desayuno nacional costarricense.'],
+            'Ivory Coast': ['Yamusukro', 'Attiéké', 'Cuscús de yuca con pescado a la parrilla y tomate.'],
+            'Croatia': ['Zagreb', 'Peka', 'Carne o pulpo cocidos bajo una campana de hierro con brasas.'],
+            'Cuba': ['La Habana', 'Ropa Vieja', 'Carne desmechada guisada con tomate, cebolla y pimiento.'],
+            'Cyprus': ['Nicosia', 'Souvlaki', 'Brochetas de cerdo marinadas con limón y orégano.'],
+            'Czechia': ['Praga', 'Svíčková', 'Solomillo en salsa cremosa con dumplings y mermelada.'],
+            'Democratic Republic of the Congo': ['Kinsasa', 'Fufu', 'Masa de mandioca con salsa de cacahuate y carné.'],
+            'Denmark': ['Copenhague', 'Smørrebrød', 'Pan de centeno con arenque, salmón o hígado de bacalao.'],
+            'Djibouti': ['Yibuti', 'Fah-fah', 'Sopa de carne y verduras con habas y pimiento.'],
+            'Dominica': ['Roseau', 'Mountain Chicken Stew', 'Estofado de rana de montaña con cebolla y tomillo.'],
+            'East Timor': ['Dili', 'Ikan Pepes', 'Pescado envuelto en hoja de plátano con especias.'],
+            'Ecuador': ['Quito', 'Encebollado', 'Sopa de pescado con yuca, cebolla roja encurtida y chifles.'],
+            'Egypt': ['El Cairo', 'Koshari', 'Arroz, lentejas y pasta con salsa de tomate y garbanzos fritos.'],
+            'El Salvador': ['San Salvador', 'Pupusa', 'Tortilla gruesa rellena de queso, frijol o chicharrón.'],
+            'Equatorial Guinea': ['Malabo', 'Succotash de Guinea', 'Guiso de maíz y frijoles con pescado y plátano.'],
+            'Eritrea': ['Asmara', 'Zigni', 'Estofado picante de carne con berbere y injera.'],
+            'Estonia': ['Tallin', 'Verivorst', 'Morcilla de cebada servida con salsa de arándanos.'],
+            'Eswatini': ['Mbabane', 'Umncweba', 'Carne seca y especiada que recuerda al biltong.'],
+            'Ethiopia': ['Adís Abeba', 'Doro Wat', 'Guiso de pollo picante con huevo, servido en injera.'],
+            'Fiji': ['Suva', 'Kokoda', 'Pescado crudo marinado en lima y leche de coco.'],
+            'Finland': ['Helsinki', 'Kalakukko', 'Pan de centeno relleno de pescado y tocino.'],
+            'France': ['París', 'Coq au Vin', 'Pollo guisado en vino tinto con champiñones y tocino.'],
+            'Gabon': ['Libreville', 'Poulet Nyembwe', 'Pollo cocido en salsa de palma.'],
+            'Gambia': ['Banjul', 'Domoda', 'Guiso de cacahuate con carne y arroz.'],
+            'Georgia': ['Tiflis', 'Khachapuri', 'Pan relleno de queso fundido con huevo y mantequilla.'],
+            'Germany': ['Berlín', 'Sauerbraten', 'Asado de res marinado en vinagre y especias, con papas.'],
+            'Ghana': ['Acra', 'Jollof Rice', 'Arroz rojo picante cocinado con tomate y especias.'],
+            'Greece': ['Atenas', 'Moussaka', 'Capas de berenjena, papa y carne con bechamel.'],
+            'Grenada': ['Saint George\'s', 'Oil Down', 'Estofado de fruta del pan, coco y carnes saladas.'],
+            'Guatemala': ['Ciudad de Guatemala', 'Pepián', 'Guiso de carne con semillas tostadas y chiles.'],
+            'Guinea': ['Conakri', 'Yassa Poulet', 'Pollo marinado en cebolla y limón, estofado.'],
+            'Guinea-Bissau': ['Bisáu', 'Caldo de Mancarra', 'Sopa de cacahuate con pescado o carne.'],
+            'Guyana': ['Georgetown', 'Pepperpot', 'Estofado de carne oscuro con casabe y especias.'],
+            'Haiti': ['Puerto Príncipe', 'Griot', 'Cerdo frito con pikliz y arroz con frijoles negros.'],
+            'Honduras': ['Tegucigalpa', 'Baleada', 'Tortilla de harina rellena de frijol, queso y crema.'],
+            'Hungary': ['Budapest', 'Goulash', 'Sopa de res con pimentón, papa y cebolla.'],
+            'Iceland': ['Reikiavik', 'Plokkfiskur', 'Estofado de bacalao con papas en salsa blanca.'],
+            'India': ['Nueva Delhi', 'Biryani', 'Arroz especiado con carne o verduras, servido con raita.'],
+            'Iran': ['Teherán', 'Kebab Koobideh', 'Brochetas de cordero picado con arroz basmati y azafrán.'],
+            'Iraq': ['Bagdad', 'Masgouf', 'Carpas del Tigris abiertas y asadas con cúrcuma y tamarindo.'],
+            'Ireland': ['Dublín', 'Irish Stew', 'Estofado de cordero con papas, cebolla y perejil.'],
+            'Israel': ['Jerusalén', 'Shakshuka', 'Huevos pochados en salsa de tomate, pimiento y especias.'],
+            'Italy': ['Roma', 'Risotto alla Milanese', 'Arroz cremoso con azafrán y parmesano.'],
+            'Jamaica': ['Kingston', 'Jerk Chicken', 'Pollo marinado en pimientos picantes y hierbas, a la brasa.'],
+            'Japan': ['Tokio', 'Sushi', 'Arroz avinagrado con pescado crudo y algas nori.'],
+            'Jordan': ['Amán', 'Mansaf', 'Cordero cocido en yogur seco servido sobre arroz.'],
+            'Kazakhstan': ['Astana', 'Beshbarmak', 'Carne de caballo o cordero sobre fideos, con cebolla.'],
+            'Kenya': ['Nairobi', 'Ugali na Nyama', 'Papilla de maíz con carne guisada.'],
+            'Kiribati': ['Tarawa Sur', 'Palusami', 'Hojas de taro al vapor con leche de coco.'],
+            'Kuwait': ['Kuwait', 'Machboos Dijaj', 'Arroz especiado con pollo y limón seco.'],
+            'Kyrgyzstan': ['Bishkek', 'Lagman', 'Fideos gruesos con carne y verduras en caldo.'],
+            'Laos': ['Vientián', 'Larb', 'Ensalada de carne picada con lima, hierbabuena y arroz tostado.'],
+            'Latvia': ['Riga', 'Pelmeni', 'Dumplings de masa rellenos de carne y cebolla.'],
+            'Lebanon': ['Beirut', 'Tabbouleh', 'Ensalada de perejil, bulgur, tomate y limón.'],
+            'Lesotho': ['Maseru', 'Papa ea Mokoenya', 'Papilla de maíz servida con espinacas y carne.'],
+            'Liberia': ['Monrovia', 'Jollof Rice', 'Arroz con tomate y especias, plato compartido en África Occidental.'],
+            'Libya': ['Trípoli', 'Couscous bil-Bosla', 'Cuscús con cebolla caramelizada y cordero.'],
+            'Liechtenstein': ['Vaduz', 'Käsknöpfle', 'Pasta de queso y cebolla frita, similar al macarrones.'],
+            'Lithuania': ['Vilna', 'Cepelinai', 'Zepelines de papa rellenos de carne y crema agria.'],
+            'Luxembourg': ['Luxemburgo', 'Judd mat Gaardebounen', 'Cuello de cerdo ahumado con habas y papas.'],
+            'Madagascar': ['Antananarivo', 'Romazava', 'Estofado de carne con hojas verdes y jengibre.'],
+            'Malawi': ['Lilongüe', 'Nshima', 'Papilla de maíz con pescado chambo a la brasa.'],
+            'Malaysia': ['Kuala Lumpur', 'Nasi Lemak', 'Arroz con leche de coco, anchoas, cacahuates y sambal.'],
+            'Maldives': ['Malé', 'Mas Huni', 'Atún desmenuzado con coco, lima y pan roshi.'],
+            'Mali': ['Bamako', 'Tiguadege Na', 'Guiso de cacahuate con pollo y arroz.'],
+            'Malta': ['La Valeta', 'Pastizzi', 'Hojaldre relleno de requesón o guisantes.'],
+            'Mauritania': ['Nuakchot', 'Thieboudienne', 'Pescado con arroz y tomate, plato nacional compartido con Senegal.'],
+            'Mauritius': ['Port Louis', 'Dholl Puri', 'Tortilla de lentejas con curry y chutney.'],
+            'Mexico': ['Ciudad de México', 'Tacos al Pastor', 'Tortillas con cerdo marinado, piña y cilantro.'],
+            'Federated States of Micronesia': ['Palikir', 'Mash Manton', 'Frutas del pan asadas con leche de coco.'],
+            'Moldova': ['Chisináu', 'Mămăligă', 'Sémola de maíz con queso y crema agria.'],
+            'Mongolia': ['Ulán Bator', 'Buuz', 'Dumplings al vapor rellenos de carne de res.'],
+            'Montenegro': ['Podgorica', 'Njeguški Steak', 'Filete con queso airado y jamón ahumado.'],
+            'Morocco': ['Rabat', 'Tajine', 'Estofado cocido a fuego lento en vasija cónica de barro.'],
+            'Mozambique': ['Maputo', 'Matapa', 'Hojas de mandioca con camarones, coco y maní.'],
+            'Myanmar': ['Naypídaw', 'Mohinga', 'Sopa de fideos de arroz con pescado y limoncillo.'],
+            'Namibia': ['Windhoek', 'Potjiekos', 'Guiso lento de carne y verduras en olla de hierro.'],
+            'Nauru': ['Yaren', 'Coconut Fish', 'Pescado asado con crema de coco.'],
+            'Nepal': ['Katmandú', 'Dal Bhat', 'Lentejas al curry con arroz y verduras.'],
+            'Netherlands': ['Ámsterdam', 'Stamppot', 'Puré de papas con col rizada y salchicha ahumada.'],
+            'New Zealand': ['Wellington', 'Hangi', 'Cordero y verduras cocidos en horno subterráneo maorí.'],
+            'Nicaragua': ['Managua', 'Gallo Pinto', 'Arroz y frijoles con queso frito, acompañado de tajada de plátano.'],
+            'Niger': ['Niamey', 'Djerma Rice', 'Arroz con carne y salsa de tomate picante.'],
+            'Nigeria': ['Abuya', 'Egusi Soup', 'Sopa de semillas de melón con espinaca y carne, con fufu.'],
+            'North Korea': ['Pionyang', 'Naengmyeon', 'Fideos fríos de trigo sarraceno con caldo helado.'],
+            'North Macedonia': ['Skopie', 'Tavče Gravče', 'Guiso de alubias al horno con paprika.'],
+            'Northern Cyprus': ['Nicosia', 'Lamb Kleftiko', 'Cordero cocido lentamente con limón y orégano.'],
+            'Norway': ['Oslo', 'Fårikål', 'Guiso de cordero y repollo con pimienta negra.'],
+            'Oman': ['Mascate', 'Shuwa', 'Cordero asado bajo tierra con especias.'],
+            'Pakistan': ['Islamabad', 'Nihari', 'Estofado picante de carne cocinado toda la noche.'],
+            'Palau': ['Ngerulmud', 'Tinola', 'Sopa de pollo con papaya verde y jengibre.'],
+            'Papua New Guinea': ['Puerto Moresby', 'Mumu', 'Cerdo y verduras cocidos en hoyo con piedras calientes.'],
+            'Paraguay': ['Asunción', 'Chipa', 'Pan de almidón de mandioca con queso y anís.'],
+            'Peru': ['Lima', 'Ceviche', 'Pescado fresco marinado en limón con ají y cebolla.'],
+            'Philippines': ['Manila', 'Adobo', 'Guiso de pollo o cerdo en vinagre, soja y ajo.'],
+            'Poland': ['Varsovia', 'Pierogi', 'Dumplings rellenos de papa, queso o carne.'],
+            'Portugal': ['Lisboa', 'Bacalhau à Brás', 'Bacalao con patatas en tiritas, huevo y aceitunas.'],
+            'Qatar': ['Doha', 'Machboos', 'Arroz especiado con pollo o cordero, plato del golfo.'],
+            'Romania': ['Bucarest', 'Sarmale', 'Rollos de repollo rellenos de carne y arroz.'],
+            'Russia': ['Moscú', 'Borsch', 'Sopa de remolacha con repollo, papa y crema agria.'],
+            'Rwanda': ['Kigali', 'Brochettes de Cabrito', 'Brochetas de cabrito a la brasa con salsa de pimentón.'],
+            'Saint Kitts and Nevis': ['Basseterre', 'Goat Water', 'Estofado especiado de cabra, considerado plato nacional.'],
+            'Saint Lucia': ['Castries', 'Green Fig and Saltfish', 'Bananas verdes con bacalao salado y salsa.'],
+            'Saint Vincent and the Grenadines': ['Kingstown', 'Roasted Breadfruit', 'Fruta de pan asada con pescado frito.'],
+            'Samoa': ['Apia', 'Palusami', 'Hojas de taro con crema de coco horneadas.'],
+            'San Marino': ['San Marino', 'Torta Tre Monti', 'Pastel de capas de oblea con chocolate.'],
+            'Saudi Arabia': ['Riad', 'Kabsa', 'Arroz especiado con pollo o cordero, el plato saudí por excelencia.'],
+            'Senegal': ['Dakar', 'Thieboudienne', 'Pescado y arroz con tomate y verduras, plato nacional.'],
+            'Republic of Serbia': ['Belgrado', 'Ćevapi', 'Salchichas de carne picada con ajvar y lepinja.'],
+            'Seychelles': ['Victoria', 'Karoul', 'Guiso de cerdo y pescado salado con chutney de coco.'],
+            'Sierra Leone': ['Freetown', 'Groundnut Stew', 'Guiso de cacahuate con pollo y hojas verdes.'],
+            'Singapore': ['Singapur', 'Hainanese Chicken Rice', 'Pollo pochado con arroz aromático y salsas.'],
+            'Slovakia': ['Bratislava', 'Bryndzové Halušky', 'Dumplings de papa con queso de oveja y panceta.'],
+            'Slovenia': ['Liubliana', 'Potica', 'Rollo dulce de masa con nuez, miel y canela.'],
+            'Solomon Islands': ['Honiara', 'Ulu Curry', 'Curry de fruta de pan con crema de coco.'],
+            'Somalia': ['Mogadiscio', 'Bariis Iskukaris', 'Arroz especiado con pasas, carne y plátano.'],
+            'South Korea': ['Seúl', 'Kimchi Jjigae', 'Guiso picante de kimchi con tofu y cerdo.'],
+            'South Sudan': ['Yuba', 'Kisra', 'Tortilla de sorgo servida con estofado de carne.'],
+            'Spain': ['Madrid', 'Paella', 'Arroz con azafrán, mariscos, pollo y verduras.'],
+            'Sri Lanka': ['Sri Jayawardenapura Kotte', 'Kottu Roti', 'Roti picado salteado con curry, verduras y huevo.'],
+            'Sudan': ['Jartum', 'Ful Medames', 'Frijoles con comino y aceite, acompañados de pan.'],
+            'Suriname': ['Paramaribo', 'Pom', 'Plato de tayer al horno con pollo en salsa de cítricos.'],
+            'Sweden': ['Estocolmo', 'Köttbullar', 'Albóndigas suecas con salsa de crema y arándanos.'],
+            'Switzerland': ['Berna', 'Rösti', 'Tortilla de papas ralladas fritas en mantequilla.'],
+            'Syria': ['Damasco', 'Kibbeh', 'Croquetas de bulgur rellenas de carne picada y piñones.'],
+            'Taiwan': ['Taipéi', 'Beef Noodle Soup', 'Sopa de fideos con carne de res estofada.'],
+            'Tajikistan': ['Dusambé', 'Qurutob', 'Pan desmenuzado con yogur, cebolla y hierbas.'],
+            'United Republic of Tanzania': ['Dodoma', 'Ugali na Samaki', 'Papilla de maíz con pescado a la parrilla.'],
+            'Thailand': ['Bangkok', 'Pad Thai', 'Fideos de arroz salteados con camarón, tamarindo y cacahuate.'],
+            'Togo': ['Lomé', 'Fufu et Sauce Gombo', 'Masa de plátano con salsa de okra pegajosa.'],
+            'Tonga': ['Nukualofa', 'Lu Pulu', 'Carne enlatada con hojas de taro y leche de coco.'],
+            'Trinidad and Tobago': ['Puerto España', 'Doubles', 'Pan frito relleno de garbanzos al curry con chutney.'],
+            'Tunisia': ['Túnez', 'Couscous', 'Sémola con pescado, patatas y harissa picante.'],
+            'Turkey': ['Ankara', 'Köfte', 'Albóndigas de cordero a la parrilla con pan plano.'],
+            'Turkmenistan': ['Asjabad', 'Palow', 'Arroz con cordero, zanahoria y uvas pasas.'],
+            'Tuvalu': ['Funafuti', 'Palusami', 'Hojas de taro al vapor con crema de coco y pescado.'],
+            'Uganda': ['Kampala', 'Matoke', 'Plátano verde machacado al vapor, servido con maní.'],
+            'Ukraine': ['Kiev', 'Varenyky', 'Dumplings rellenos de papa, repollo o cerezas.'],
+            'United Arab Emirates': ['Abu Dabi', 'Harees', 'Trigo y carne cocidos lentamente hasta ser cremosos.'],
+            'United Kingdom': ['Londres', 'Fish and Chips', 'Bacalao rebozado con papas fritas y salsa de guisantes.'],
+            'United States of America': ['Washington D.C.', 'Hamburguesa', 'Pan con carne de res a la parrilla, lechuga, tomate y queso.'],
+            'Uruguay': ['Montevideo', 'Asado', 'Parrillada de cortes de res al asador con chimichurri.'],
+            'Uzbekistan': ['Taskent', 'Plov', 'Arroz con cordero, zanahoria, ajo y comino.'],
+            'Vanuatu': ['Port Vila', 'Lap Lap', 'Verduras ralladas y carnes horneadas en hojas de plátano.'],
+            'Vatican': ['Ciudad del Vaticano', 'Ravioli', 'Pasta rellena servida en caldo o con salsa.'],
+            'Venezuela': ['Caracas', 'Arepa', 'Panecillo de maíz relleno de carnes, queso o frijoles.'],
+            'Vietnam': ['Hanói', 'Pho', 'Sopa de fideos con pollo o res, hierbas y lima.'],
+            'Yemen': ['Saná', 'Saltah', 'Estofado de cordero con salsa de berenjena y fenogreco.'],
+            'Zambia': ['Lusaka', 'Nshima', 'Papilla de maíz con guiso de pescado o hojas verdes.'],
+            'Zimbabwe': ['Harare', 'Sadza', 'Papilla de maíz con carne de res y verduras.'],
+            'Curaçao': ['Willemstad', 'Keshi Yena', 'Queso relleno de carne picada, pasas y aceitunas, horneado.'],
+            'Somaliland': ['Hargeisa', 'Canjeero', 'Panqueque de masa fermentada con carne y miel.'],
+            'Western Sahara': ['El Aaiún', 'Couscous con Camello', 'Cuscús árido con carne de camello y verduras.'],
+            'South Georgia and the Islands': ['Grytviken', 'Caldo de Mero', 'Sopa tradicional de pescado antártico.'],
+            'Falkland Islands': ['Stanley', 'Caldo de Patas Negras', 'Sopa de ave de las islas con cebada.'],
+            'Tristan da Cunha': ['Edimburgo de los Siete Mares', 'Tristan Lobster', 'Langosta de agua fría, exportación principal de la isla.'],
+            'British Indian Ocean Territory': ['Diego García', 'Curry de la Isla', 'Plato fusionado con influencias indias del enclave.'],
+            'Bermuda': ['Hamilton', 'Codfish and Potatoes', 'Bacalao salado con papas, huevo y salsa de sherry.'],
+            'Cayman Islands': ['George Town', 'Turtle Stew', 'Estofado de tortuga con ron y especias.'],
+            'Turks and Caicos Islands': ['Cockburn Town', 'Conch Fritters', 'Buñuelos de caracol marino fritos.'],
+            'British Virgin Islands': ['Road Town', 'Fungi and Fish', 'Pasta de maíz con pescado fresco.'],
+            'Anguilla': ['El Valet', 'Crayfish and Rice', 'Langostinos con arroz, plato tradicional anguileño.'],
+            'Montserrat': ['Brades', 'Goat Water', 'Estofado especiado de cabra con pan.'],
+            'Saint Helena, Ascension and Tristan da Cunha': ['Jamestown', 'Ballot', 'Pastel de pescado especiado y comenzas de hierbas.'],
+            'Saint Pierre and Miquelon': ['Saint Pierre', 'Beignets de Morue', 'Buñuelos de bacalao, herencia de la cocina francesa.'],
+            'Greenland': ['Nuuk', 'Kiviak', 'Aves fermentadas, manjar tradicional inuit.'],
+            'Faroe Islands': ['Tórshavn', 'Ræstur Fiskur', 'Pescado fermentado y secado al aire, cocina feroesa.'],
+            'Isle of Man': ['Douglas', 'Manx Queenies', 'Vieiras de la isla salteadas con ajo y mantequilla.'],
+            'Jersey': ['Saint Helier', 'Jersey Wonders', 'Masa dulce frita, clásica de las islas del Canal.'],
+            'Guernsey': ['Saint Peter Port', 'Guernsey Bean Jar', 'Estofado de frijoles y cerdo con cebada.'],
+            'Gibraltar': ['Gibraltar', 'Calentita', 'Torta de harina de garbanzo al horno con aceite, pan ácimo gibraltareño.'],
+            'Monaco': ['Mónaco', 'Barbagiuan', 'Bocadillo frito relleno de calabaza y queso.'],
+            'Macao S.A.R': ['Macao', 'Minchi', 'Carne picada con patatas fritas y huevo, plato macanés.'],
+            'Hong Kong S.A.R.': ['Hong Kong', 'Dim Sum', 'Dumplings y bocaditos al vapor servidos en cestitas.'],
+            'Northern Mariana Islands': ['Saipán', 'Chamorro BBQ', 'Cerdo a la brasa con salsa de soja y lima, estilo chamorro.'],
+            'Guam': ['Agaña', 'Kelaguen', 'Carne de pollo o pescado marinada en limón y coco.'],
+            'American Samoa': ['Pago Pago', 'Palusami', 'Hojas de taro con crema de coco al horno.'],
+            'United States Virgin Islands': ['Charlotte Amalie', 'Callaloo', 'Sopa cremosa de hojas verdes y okra con cangrejo.'],
+            'Aruba': ['Oranjestad', 'Keshi Yena', 'Queso holandés relleno de carne y pasas.'],
+            'Saint Martin': ['Marigot', 'Accras de Morue', 'Buñuelos de bacalao con habanero.'],
+            'Saint Barthelemy': ['Gustavia', 'Accras de Bacalao', 'Buñuelos crujientes de bacalao, herencia culinaria francesa.'],
+            'Sint Maarten': ['Philipsburg', 'Johnnycakes', 'Pan de maíz frito con guiso de pescado.'],
+            'United States Minor Outlying Islands': ['Sin capital', 'Atún de Atolón', 'Pesca de atún en las islas deshabitadas del Pacífico.'],
+            'Antarctica': ['Base McMurdo', 'Raciones Frías', 'Menús cocinados por las expediciones científicas del continente.'],
+            'Kosovo': ['Pristina', 'Flija', 'Pastel de capas de masa fina con nata, especialidad albanokosovar.'],
+            'French Polynesia': ['Papeete', 'Poisson Cru', 'Pescado crudo con lima y leche de coco.'],
+            'New Caledonia': ['Numea', 'Bougna', 'Pescado y verduras cocidos en hojas de plátano.'],
+            'Wallis and Futuna': ['Mata-Utu', 'Palusami', 'Hoja de taro rellena de crema de coco, al horno.'],
+            'Niue': ['Alofi', 'Takihi', 'Pudín de papaya y taro con coco, envuelto en hojas.'],
+            'Cook Islands': ['Avarua', 'Ika Mata', 'Pescado crudo marinado en cítricos, versión maorí.'],
+            'Palestine': ['Ramala', 'Maqluba', 'Arroz invertido con pollo, berenjena y especias.'],
+            'São Tomé and Principe': ['Santo Tomé', 'Calulu', 'Guiso de pescado seco con aceite de palma y plátano.'],
+            'Marshall Islands': ['Majuro', 'Breadfruit with Coconut', 'Fruta del pan asada con crema de coco fresco.'],
+            'Saint Helena': ['Jamestown', 'Fishcakes', 'Buñuelos de pescado con salsa picante, plato típico isleño.'],
+            'Pitcairn Islands': ['Adamstown', 'Breadfruit Pie', 'Pastel de fruta del pan con miel de isla.'],
+            'Aland': ['Mariehamn', 'Åland Pancake', 'Tortita de cardamomo con ciruelas y crema.'],
+            'Norfolk Island': ['Kingston', 'Borrowed Plum', 'Pudin tradicional a base de banana y miel de palma.'],
+            'French Southern and Antarctic Lands': ['Puerto Dumont d\'Urville', 'Caldo Antártico', 'Guiso de pescado austral servido a las expediciones.'],
+            'Heard Island and McDonald Islands': ['Base Atlas Cove', 'Raciones de Expedición', 'Alimentos liofilizados de los equipos de investigación.'],
+            'Indian Ocean Territories': ['Isla del Coco', 'Pargo Marino', 'Pescado asado con hierbas del océano Índico.'],
+            'Coral Sea Islands': ['Sin capital', 'Atún de Arrecife', 'Pescado fresco del mar de Coral, sin población estable.'],
+            'Spratly Islands': ['Sin capital', 'Pescado Seco', 'Raciones de pescado de las guarniciones del archipiélago.'],
+            'Clipperton Island': ['Sin capital', 'Cangrejo de Coco', 'Cangrejos terrestres de la isla desierta del Pacífico.'],
+            'Ashmore and Cartier Islands': ['Sin capital', 'Pescado de Arrecife', 'Pesca local de las aguas de Ashmore.'],
+            'Bajo Nuevo Bank (Petrel Is.)': ['Sin capital', 'Pescado de Banco', 'Pesca de altura del banco del Caribe.'],
+            'Serranilla Bank': ['Sin capital', 'Caracol de Banco', 'Mariscos recolectados en el banco de Serranilla.'],
+            'Scarborough Reef': ['Sin capital', 'Atún de Arrecife', 'Pesca de atún en el arrecife de Scarborough.'],
+            'Baykonur Cosmodrome': ['Baykonur', 'Shchi', 'Sopa de repollo de la tradición kazaja local.'],
+            'Dhekelia Sovereign Base Area': ['Episkopi', 'Souvla', 'Brochetas de cordero de la cocina chipriota.'],
+            'Akrotiri Sovereign Base Area': ['Akrotiri', 'Halloumi', 'Queso chipriota a la parrilla con hierbas.'],
+            'US Naval Base Guantanamo Bay': ['Guantánamo', 'Moros y Cristianos', 'Arroz y frijoles negros, plato cubano.'],
+            'Brazilian Island': ['Ilha Brasileira', 'Pescado Amazónico', 'Pesca del río Amazonas cocinada a la brasa.'],
+            'Cyprus No Mans Area': ['Zona de Nicosia', 'Raciones de Patrulla', 'Comida de campaña de la fuerza de paz de la ONU.'],
+            'Siachen Glacier': ['Base Siachen', 'Raciones de Altura', 'Alimentos de montaña para soldados de gran altitud.'],
+            'Southern Patagonian Ice Field': ['Campo de Hielo', 'Cordero Asado', 'Cordero patagónico, tradición del sur de Chile y Argentina.'],
+            'Bir Tawil': ['Sin capital', 'Raciones de Frontera', 'Zona inhabitada sin cocina local establecida.']
+        };
+
         const map = new maplibregl.Map({
             container: 'map',
             projection: 'globe',
@@ -429,44 +680,73 @@
                 map.addLayer({
                     id: 'country-borders',
                     type: 'fill-extrusion',
-                source: 'countries',
-                paint: {
-                    'fill-extrusion-color': '#4fc3f7',
-                    'fill-extrusion-opacity': 0.25,
-                    'fill-extrusion-height': 0,
-                    'fill-extrusion-base': 0
-                },
-                filter: ['==', '$type', 'Polygon']
-            }, 'country-fill');
+                    source: 'countries',
+                    paint: {
+                        'fill-extrusion-color': '#4fc3f7',
+                        'fill-extrusion-opacity': 0.25,
+                        'fill-extrusion-height': 0,
+                        'fill-extrusion-base': 0
+                    },
+                    filter: ['==', ['get', 'name'], '']
+                }, 'country-fill');
+            }
+
+            if (!map.getLayer('country-hover')) {
+                map.addLayer({
+                    id: 'country-hover',
+                    type: 'fill',
+                    source: 'countries',
+                    paint: {
+                        'fill-color': '#ffd54f',
+                        'fill-opacity': 0.45
+                    },
+                    filter: ['==', ['get', 'name'], '']
+                }, 'country-line');
             }
 
             // Click sobre el globo: identificar pais
             map.on('click', (e) => {
                 const features = map.queryRenderedFeatures(e.point, {
-                    layers: ['country-fill', 'country-borders']
+                    layers: ['country-fill', 'country-borders', 'country-hover']
                 });
                 if (features.length > 0) {
                     const props = features[0].properties;
-                    const name = props.ADMIN || props.name || 'Desconocido';
+                    const name = props.name || props.ADMIN || 'Desconocido';
                     selectCountry(name, props, e.lngLat);
                 }
             });
 
+            let lastHover = '';
             map.on('mousemove', (e) => {
                 const features = map.queryRenderedFeatures(e.point, {
-                    layers: ['country-fill', 'country-borders']
+                    layers: ['country-fill', 'country-borders', 'country-hover']
                 });
                 if (features.length > 0) {
-                    const name = features[0].properties.ADMIN || features[0].properties.name || 'Desconocido';
+                    const name = features[0].properties.name || features[0].properties.ADMIN || 'Desconocido';
+                    if (name !== lastHover) {
+                        lastHover = name;
+                        map.setFilter('country-hover', ['==', ['get', 'name'], name]);
+                    }
                     showTooltip(e.point, name);
                     map.getCanvas().style.cursor = 'pointer';
                 } else {
+                    if (lastHover) {
+                        lastHover = '';
+                        map.setFilter('country-hover', ['==', ['get', 'name'], '']);
+                    }
                     hideTooltip();
                     map.getCanvas().style.cursor = '';
                 }
             });
 
-            map.on('mouseleave', () => hideTooltip());
+            map.getCanvas().addEventListener('mouseleave', () => {
+                if (lastHover) {
+                    lastHover = '';
+                    map.setFilter('country-hover', ['==', ['get', 'name'], '']);
+                }
+                hideTooltip();
+                map.getCanvas().style.cursor = '';
+            });
         });
 
         const tooltip = document.getElementById('tooltip');
@@ -495,8 +775,8 @@
         function highlightCountry(name) {
             map.setPaintProperty('country-fill', 'fill-color', '#4fc3f7');
             map.setPaintProperty('country-fill', 'fill-opacity', 0.25);
-            map.setFilter('country-fill', ['==', ['get', 'ADMIN'], name]);
-            map.setFilter('country-borders', ['==', ['get', 'ADMIN'], name]);
+            map.setFilter('country-fill', ['==', ['get', 'name'], name]);
+            map.setFilter('country-borders', ['==', ['get', 'name'], name]);
         }
 
         function resetHighlight() {
@@ -537,29 +817,58 @@
             flyToCountry(name);
         }
 
+        function flagFromISO(code) {
+            if (!code || code.length !== 2) return '';
+            return code.toUpperCase().replace(/./g, (c) => String.fromCodePoint(127397 + c.charCodeAt(0)));
+        }
+
+        function getFoodData(name, props) {
+            const base = comidaPorPais[name];
+            if (base) {
+                return { has: true, flag: base.flag, capital: base.capital, food: base.comida, desc: base.descripcion, img: base.img };
+            }
+            const extra = comidaExtra && comidaExtra[name];
+            if (extra) {
+                return {
+                    has: true,
+                    flag: flagFromISO(props ? props['ISO3166-1-Alpha-2'] : '') || '🌍',
+                    capital: extra[0],
+                    food: extra[1],
+                    desc: extra[2],
+                    img: null
+                };
+            }
+            return { has: false };
+        }
+
         function showInfoPanel(name, properties, center) {
             const panel = document.getElementById('infoPanel');
             const details = [
-                properties.ADMIN ? `Nombre: ${nombreEspanol[properties.ADMIN] || properties.ADMIN}` : '',
-                properties.ISO_A3 ? `Codigo ISO: ${properties.ISO_A3}` : '',
+                properties.name ? `Nombre: ${nombreEspanol[properties.name] || properties.name}` : '',
+                properties['ISO3166-1-Alpha-3'] ? `Codigo ISO: ${properties['ISO3166-1-Alpha-3']}` : '',
                 `Coordenadas: ${center.lat.toFixed && center.lat ? center.lat.toFixed(2) + '°' : ''} ${center.lng.toFixed && center.lng ? center.lng.toFixed(2) + '°' : ''}`
             ].filter(Boolean).join('<br>');
 
             document.getElementById('infoName').textContent = nombreEspanol[name] || name;
             document.getElementById('infoDetails').innerHTML = details;
 
-            const comida = comidaPorPais[name];
+            const comida = getFoodData(name, properties);
             const foodBlock = document.getElementById('foodBlock');
             const foodSep = document.getElementById('foodSep');
-            if (comida) {
+            const photo = document.getElementById('foodPhoto');
+            if (comida.has) {
                 document.getElementById('foodFlag').textContent = comida.flag;
-                document.getElementById('foodTitle').textContent = '🍽️ ' + comida.comida;
+                document.getElementById('foodTitle').textContent = '🍽️ ' + comida.food;
                 document.getElementById('foodCapital').textContent = '🏛️ Capital: ' + comida.capital;
-                const photo = document.getElementById('foodPhoto');
-                photo.src = 'img/' + comida.img + '.jpg';
-                photo.alt = 'Foto de ' + comida.comida;
-                photo.style.display = 'block';
-                document.getElementById('foodDesc').textContent = comida.descripcion;
+                if (comida.img) {
+                    photo.src = 'img/' + comida.img + '.jpg';
+                    photo.alt = 'Foto de ' + comida.food;
+                    photo.style.display = 'block';
+                } else {
+                    photo.removeAttribute('src');
+                    photo.style.display = 'none';
+                }
+                document.getElementById('foodDesc').textContent = comida.desc;
                 foodBlock.style.display = 'block';
                 foodSep.style.display = '';
             } else {
