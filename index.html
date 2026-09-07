@@ -373,63 +373,14 @@
             zoom: 1.6,
             minZoom: 0.5,
             maxZoom: 8,
-            style: {
-                version: 8,
-                sources: {
-                    world: {
-                        type: 'raster',
-                        tiles: [
-                            'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-                            'https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-                            'https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
-                        ],
-                        tileSize: 256,
-                        attribution: '&copy; OpenStreetMap &copy; CARTO'
-                    },
-                    countries: {
-                        type: 'geojson',
-                        data: 'https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson'
-                    }
-                },
-                layers: [
-                    {
-                        id: 'background',
-                        type: 'background',
-                        paint: { 'background-color': '#05070f' }
-                    },
-                    {
-                        id: 'earth',
-                        type: 'raster',
-                        source: 'world',
-                        paint: { 'raster-saturation': -0.2 }
-                    },
-                    {
-                        id: 'country-line',
-                        type: 'line',
-                        source: 'countries',
-                        paint: {
-                            'line-color': 'rgba(120, 190, 255, 0.6)',
-                            'line-width': 0.6
-                        }
-                    },
-                    {
-                        id: 'country-fill',
-                        type: 'fill',
-                        source: 'countries',
-                        paint: {
-                            'fill-color': '#4fc3f7',
-                            'fill-opacity': 0
-                        }
-                    }
-                ]
-            },
+            style: 'https://tiles.openfreemap.org/styles/liberty',
             attributionControl: false
         });
 
         map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'bottom-right');
         map.addControl(new maplibregl.AttributionControl({
             compact: true,
-            customAttribution: 'OpenStreetMap | CARTO | GeoCountries'
+            customAttribution: 'OpenStreetMap | OpenFreeMap | GeoCountries'
         }), 'bottom-left');
 
         map.on('load', () => {
@@ -442,10 +393,42 @@
                 'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 0.3, 8, 1]
             });
 
-            // Feather/las borradoras de paises como extrusion para resaltar
-            map.addLayer({
-                id: 'country-borders',
-                type: 'fill-extrusion',
+            // Fuente y capas de paises sobre el mapa base
+            if (!map.getSource('countries')) {
+                map.addSource('countries', {
+                    type: 'geojson',
+                    data: 'https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson'
+                });
+            }
+
+            if (!map.getLayer('country-line')) {
+                map.addLayer({
+                    id: 'country-line',
+                    type: 'line',
+                    source: 'countries',
+                    paint: {
+                        'line-color': 'rgba(20, 90, 200, 0.55)',
+                        'line-width': 0.6
+                    }
+                });
+            }
+
+            if (!map.getLayer('country-fill')) {
+                map.addLayer({
+                    id: 'country-fill',
+                    type: 'fill',
+                    source: 'countries',
+                    paint: {
+                        'fill-color': '#4fc3f7',
+                        'fill-opacity': 0
+                    }
+                });
+            }
+
+            if (!map.getLayer('country-borders')) {
+                map.addLayer({
+                    id: 'country-borders',
+                    type: 'fill-extrusion',
                 source: 'countries',
                 paint: {
                     'fill-extrusion-color': '#4fc3f7',
@@ -455,6 +438,7 @@
                 },
                 filter: ['==', '$type', 'Polygon']
             }, 'country-fill');
+            }
 
             // Click sobre el globo: identificar pais
             map.on('click', (e) => {
