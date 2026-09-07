@@ -166,6 +166,56 @@
             color: rgba(255,255,255,0.8);
         }
 
+        .info-panel .detail-sep {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin: 10px 0;
+            color: rgba(255,255,255,0.4);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .info-panel .food-block {
+            margin-top: 8px;
+        }
+
+        .info-panel .food-flag {
+            font-size: 2.6rem;
+            line-height: 1.2;
+            margin-bottom: 6px;
+        }
+
+        .info-panel .food-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffb74d;
+            margin-bottom: 6px;
+        }
+
+        .info-panel .food-capital {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 10px;
+        }
+
+        .info-panel .food-photo {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 3px solid rgba(255,255,255,0.15);
+            margin-bottom: 10px;
+            background: #2a2a4a;
+            display: block;
+        }
+
+        .info-panel .food-desc {
+            font-size: 12px;
+            line-height: 1.65;
+            color: rgba(255,255,255,0.75);
+            text-align: left;
+        }
+
         .info-panel .close-btn {
             position: absolute;
             top: 8px;
@@ -217,6 +267,14 @@
         <span class="close-btn" onclick="closeInfoPanel()">&times;</span>
         <h3 id="infoName"></h3>
         <p id="infoDetails"></p>
+        <div class="detail-sep" id="foodSep">Gastronomia</div>
+        <div class="food-block" id="foodBlock">
+            <div class="food-flag" id="foodFlag"></div>
+            <div class="food-name" id="foodTitle"></div>
+            <div class="food-capital" id="foodCapital"></div>
+            <img class="food-photo" id="foodPhoto" alt="Foto de la comida" />
+            <div class="food-desc" id="foodDesc"></div>
+        </div>
     </div>
 
     <script>
@@ -238,6 +296,93 @@
         let selectedLayer = null;
         let allCountries = [];
         let geojsonLayer = null;
+
+        // ====== Gastronomia del mundo (base de datos de comidas por pais) ======
+        const comidaPorPais = {
+            "El Salvador": { flag: "🇸🇻", capital: "San Salvador", img: "pupusas", comida: "Pupusas", descripcion: "Tortillas gruesas de maíz o arroz rellenas de queso, frijoles refritos o chicharrón, doradas en plancha. Se sirven con curtido (repollo encurtido) y salsa de tomate. Son el plato nacional; cada segundo domingo de noviembre se celebra el Día Nacional de la Pupusa." },
+            "Guatemala": { flag: "🇬🇹", capital: "Ciudad de Guatemala", img: "pepian", comida: "Pepián", descripcion: "Guiso espeso de carne condimentado con semillas tostadas (pepitoria, ajonjolí) y chiles secos molidos, junto con verduras. Tiene tres versiones según la carne: de res, de pollo o de cerdo. Es un plato de origen prehispánico que se sirve con arroz y tortillas." },
+            "Honduras": { flag: "🇭🇳", capital: "Tegucigalpa", img: "baleadas", comida: "Baleadas", descripcion: "Tortilla de harina de trigo doblada en dos y rellena de frijoles refritos, queso rallado y crema de mantequilla. Es un desayuno o merienda económica y muy popular en la calle. La versión \"con todo\" añade huevo y/o aguacate." },
+            "Nicaragua": { flag: "🇳🇮", capital: "Managua", img: "nacatamal", comida: "Nacatamal", descripcion: "Tamal grande de maíz relleno de carne de cerdo o pollo, arroz, papas, tomate y cebolla, envuelto en hojas de plátano. Se cocina al vapor durante horas y se guarda bien para acompañar. Es típico de los fines de semana y las fiestas familiares." },
+            "Costa Rica": { flag: "🇨🇷", capital: "San José", img: "gallopinto", comida: "Gallo pinto", descripcion: "Mezcla de arroz y frijoles negros o rojos salteados con cebolla, chile dulce y culantro. Es el corazón del desayuno costarricense y se acompaña con huevo, queso, plátano maduro frito y café. Su nombre describe su apariencia pintada (pintarrajada)." },
+            "Panama": { flag: "🇵🇦", capital: "Ciudad de Panamá", img: "sancocho", comida: "Sancocho panameño", descripcion: "Sopa espesa de gallina con ñame, yuca, otoe o plátano y culantro. Es un plato reconfortante, ideal para celebraciones y para los días de lluvia. Casi cada región del país tiene su propia variante con distintos tubérculos." },
+            "Colombia": { flag: "🇨🇴", capital: "Bogotá", img: "bandejapaisa", comida: "Bandeja paisa", descripcion: "Plato abundante y colorido con arroz, frijoles, carne de res, chicharrón, huevo frito, plátano maduro, arepa, chorizo y aguacate. Nació en la región de Antioquia y se toma tradicionalmente al mediodía. Se considera el plato más representativo de Colombia." },
+            "Venezuela": { flag: "🇻🇪", capital: "Caracas", img: "arepa", comida: "Arepa", descripcion: "Pan redondo y plano de masa de maíz precocida, dorado en un budare. Se abre por la mitad y se rellena con queso, jamón, carne mechada, pollo o el clásico \"reina pepiada\" (de aguacate y pollo). Se come todos los días, en el desayuno o la cena." },
+            "Ecuador": { flag: "🇪🇨", capital: "Quito", img: "cevichue", comida: "Ceviche ecuatoriano", descripcion: "Camarones o pescado marinados en jugo de naranja agria y limón, con cebolla, tomate y cilantro. Se sirve frío con tostado o maíz cancha, y a veces con chifles (rodajas de plátano frito). Es un manjar de la costa, delicioso al mediodía." },
+            "Peru": { flag: "🇵🇪", capital: "Lima", img: "ceviche", comida: "Ceviche", descripcion: "Pescado o mariscos frescos \"cocinados\" en jugo de limón, con cebolla morada, ají limo y cilantro. Se sirve al momento con camote, choclo (maíz) y cancha serrana. Fue declarado Patrimonio Cultural de la Nación y gran embajador culinario." },
+            "Brazil": { flag: "🇧🇷", capital: "Brasilia", img: "feijoada", comida: "Feijoada", descripcion: "Guiso de frijoles negros cocido a fuego lento con varias carnes de cerdo y de res, como tocino, lomo y chorizo. Se acompaña de arroz blanco, col salteada, rodajas de naranja y farofa. Es un plato histórico, hoy símbolo nacional que se disfruta en almuerzos de miércoles y sábado." },
+            "Bolivia": { flag: "🇧🇴", capital: "La Paz y Sucre", img: "saltenas", comida: "Salteñas", descripcion: "Empanadas horneadas de masa hojaldrada rellenas de carne o pollo con un jugo calientito, papa, arvejas, huevo cocido y aceituna. El caldo interno las hace especiales: se comen inclinadas para no derramarse. Se disfrutan por la mañana, pocas horas después de hornearse." },
+            "Paraguay": { flag: "🇵🇾", capital: "Asunción", img: "chipa", comida: "Chipa", descripcion: "Pan de almidón de mandioca con queso, manteca y un toque de anís, crujiente por fuera y elástico por dentro. Se hornea tradicionalmente en horno de barro, a veces sobre hojas. Es el pan callejero por excelencia en Paraguay y el noreste argentino." },
+            "Uruguay": { flag: "🇺🇾", capital: "Montevideo", img: "asado", comida: "Asado", descripcion: "Carne de res asada a la parrilla con sal gruesa, acompañada de chorizos, morcillas y pan. El \"asador\" controla el fuego lento sobre las brasas para lograr el punto justo. Es mucho más que comida: es toda una institución familiar del fin de semana." },
+            "Argentina": { flag: "🇦🇷", capital: "Buenos Aires", img: "asado", comida: "Asado", descripcion: "Parrillada criolla de costillas, vacío, chorizo, morcilla y chinchulín, cocinada lentamente a las brasas. Se acompaña de chimichurri, ensalada y vino tinto. Reunir a familia y amigos alrededor del fuego los domingos es una tradición sagrada." },
+            "Chile": { flag: "🇨🇱", capital: "Santiago", img: "empanadapino", comida: "Empanada de pino", descripcion: "Empanada de masa de harina de trigo dorada al horno, rellena de \"pino\" (carne de res picada con cebolla), aceituna, pasas y un trozo de huevo cocido. Es el platillo bandera de las Fiestas Patrias del 18 de septiembre. Se come con ají y un buen vino tinto." },
+            "Mexico": { flag: "🇲🇽", capital: "Ciudad de México", img: "tacospastor", comida: "Tacos al pastor", descripcion: "Tortillas de maíz rellenas de carne de cerdo marinada en achiote y chiles, asada en un trompo vertical parecido al shawarma. Se sirven con trocitos de piña asada, cebolla, cilantro y salsa. El equilibrio dulce-picante los hace irresistibles hasta la madrugada." },
+            "Spain": { flag: "🇪🇸", capital: "Madrid", img: "paella", comida: "Paella", descripcion: "Arroz cocinado con azafrán, caldo y acompañamientos como mariscos, pollo, conejo y verduras, típico de Valencia. Se prepara en una paellera ancha, de preferencia sobre fuego de leña, y el socarrat (fondo tostado) es el premio. Se come directo de la paella. Su cara se ha vuelto icono mundial." },
+            "Italy": { flag: "🇮🇹", capital: "Roma", img: "pizza", comida: "Pizza napolitana", descripcion: "Masa fina y suave con bordes inflados, cubierta de tomate San Marzano, mozzarella, albahaca fresca y aceite de oliva. Se hornea a temperaturas altísimas en horno de piedra o leña en apenas 90 segundos. El oficio de los pizzaioli fue declarado Patrimonio Inmaterial de la UNESCO." },
+            "France": { flag: "🇫🇷", capital: "París", img: "croissant", comida: "Croissant", descripcion: "Pan de masa laminada con mucha mantequilla: dorado, crujiente por fuera y suave por dentro, con la clásica forma de media luna. Se desayuna a diario con café o chocolate caliente. Aunque se pregona como francés, desciende del \"kipferl\" austríaco." },
+            "Germany": { flag: "🇩🇪", capital: "Berlín", img: "bratwurst", comida: "Bratwurst", descripcion: "Salchicha de cerdo asada a la parrilla, sazonada con pimienta, nuez moscada y comino. Se sirve en pan artesanal con mostaza dulce o picante. Cada región guarda celosa su receta: la de Núremberg es pequeña y se ordena en porciones de 6." },
+            "United Kingdom": { flag: "🇬🇧", capital: "Londres", img: "fishchips", comida: "Fish and chips", descripcion: "Pescado blanco rebozado en masa crujiente y frito en abundante aceite, servido con papas fritas gruesas, sal, vinagre de malta y guisantes o salsa tártara. Era el almuerzo clásico de los viernes (día de pescado). Sigue siendo el bocado callejero británico por excelencia." },
+            "Ireland": { flag: "🇮🇪", capital: "Dublín", img: "stew", comida: "Estofado irlandés", descripcion: "Guiso tradicional de cordero con papas, zanahorias, cebolla y caldo, cocinado a fuego lento hasta que la carne se deshace. No lleva muchos condimentos: el secreto está en los ingredientes humildes y el tiempo de cocción. Es el plato más reconfortante contra el frío irlandés." },
+            "Portugal": { flag: "🇵🇹", capital: "Lisboa", img: "bacalao", comida: "Bacalao a la brasa", descripcion: "El bacalao salado es el \"fiel amigo\" de Portugal y se prepara de cientos de maneras; a la brasa se asa con aceite de oliva, ajo y papas. Es plato obligado en la cena de Nochebuena. Se acompaña con aceitunas, pan y un buen vino verde." },
+            "Netherlands": { flag: "🇳🇱", capital: "Ámsterdam", img: "stroopwafel", comida: "Stroopwafel", descripcion: "Gofre fino, crujiente y ligeramente caramelizado, relleno de \"stroop\" (almíbar de caramelo). La tradición es colocarlo sobre la taza de café caliente para que el vapor suavice el relleno. Se inventó en Gouda a fines del siglo XIX y conquistó toda Europa." },
+            "Belgium": { flag: "🇧🇪", capital: "Bruselas", img: "frites", comida: "Papas fritas belgas", descripcion: "Papas fritas gruesas, doradas y crujientes, freídas dos veces (una a baja y otra a alta temperatura) y servidas en cono de papel. Se acompañan con mayonesa, salsa andaluza o tártara. Bélgica se disputa su invención y las trata como un tesoro nacional." },
+            "Switzerland": { flag: "🇨🇭", capital: "Berna", img: "fondue", comida: "Fondue de queso", descripcion: "Quesos gruyer y emmental fundidos con vino blanco y un toque de kirsch (aguardiente de cereza). Se moja pan con tenedores largos y nunca se deja de revolver en forma de 8. La corteza caramelizada del fondo, llamada \"la religieuse\", es el bocado más codiciado." },
+            "Turkey": { flag: "🇹🇷", capital: "Ankara", img: "kebab", comida: "Kebab", descripcion: "Carne de cordero, pollo o res marinada y asada; en su versión shish va en brocheta y en la versión döner gira en un trompo vertical. Se sirve con pan plano, arroz, ensalada y yogur. La palabra \"kebap\" significa literalmente \"carne asada\" en turco." },
+            "Greece": { flag: "🇬🇷", capital: "Atenas", img: "moussaka", comida: "Moussaka", descripcion: "Sándwich de berenjenas asadas, carne de res picada con tomate y canela, y una capa dorada de crema bechamel gratinada. Es el plato griego más internacional, con raíces en la cocina otomana. Se corta en cuadros y se sirve templado, acompañado de ensalada griega." },
+            "Sweden": { flag: "🇸🇪", capital: "Estocolmo", img: "kottbullar", comida: "Albóndigas suecas", descripcion: "Albóndigas de carne molida con cebolla, pan rallado y pimienta, bañadas en una salsa cremosa de crema y caldo. Se sirven de forma clásica con puré de papa, mermelada de arándanos rojos y encurtidos. Un famoso catálogo de muebles las hizo famosas en todo el mundo." },
+            "Norway": { flag: "🇳🇴", capital: "Oslo", img: "salmon", comida: "Salmón noruego", descripcion: "Salmón del Atlántico, servido fresco, ahumado o como gravlax (marinado en eneldo, azúcar y sal). El ahumado en frío es un manjar que se sirve sobre pan o tostada con crema. Noruega es uno de los mayores productores de salmón del mundo." },
+            "Finland": { flag: "🇫🇮", capital: "Helsinki", img: "karjalanpir", comida: "Karjalanpiirakka", descripcion: "Pastelitos de corteza fina de centeno con relleno cremoso de arroz con leche o puré de papa, y bordes bellamente plegados a mano. Se sirven calientes con \"munavoi\" (mezcla de mantequilla y huevo duro). Son originarios de la región de Carelia." },
+            "Poland": { flag: "🇵🇱", capital: "Varsovia", img: "pierogi", comida: "Pierogi", descripcion: "Empanadillas hervidas, rellenas de papa y requesón (las famosas \"ruskie\"), carnes, col fermentada o hasta frutas dulces. Se sirven con cebolla frita, crema agria y mantequilla derretida. Los polacos dicen \"pierogi to pierogi\": un pierogi es un pierogi, sin más explicación." },
+            "Russia": { flag: "🇷🇺", capital: "Moscú", img: "borsch", comida: "Borsch", descripcion: "Sopa de color escarlata hecha de remolacha, repollo, papa y zanahoria, servida con una cucharada de crema agria, ajo y hierbas. Se acompaña con pampushka, un panecillo untado en ajo. Es originario de Ucrania y se toma bien caliente en los crudos inviernos." },
+            "Czechia": { flag: "🇨🇿", capital: "Praga", img: "svickova", comida: "Svíčková", descripcion: "Solomillo de res marinado con verduras (zanahoria, apio, raíz de perejil) y especias, asado y servido con una crema espesa de verduras, crema ácida y jalea de arándanos o grosella. Se acompaña con knedlíky, unos dumplings de pan tipo bollo. Es el plato nacional checo." },
+            "Hungary": { flag: "🇭🇺", capital: "Budapest", img: "gulash", comida: "Gulash", descripcion: "Guiso de res con pimentón, papas, cebolla y pimientos, cocinado a fuego lento en una olla colgante llamada bogrács. Puede servirse como sopa espesa o plato principal. El pimentón húngaro, dulce y ahumado, es el alma de la receta." },
+            "Egypt": { flag: "🇪🇬", capital: "El Cairo", img: "koshari", comida: "Koshari", descripcion: "Hormeada mezcla de arroz, lentejas, macarrones y garbanzos, bañada en salsa de tomate picante y coronada con cebolla frita crujiente y ajo. Es barato, nutritivo y 100 % vegetariano, vendido en cada esquina de El Cairo. Es el plato nacional egipcio." },
+            "Morocco": { flag: "🇲🇦", capital: "Rabat", img: "couscous", comida: "Cuscús", descripcion: "Sémola de trigo cocida al vapor tres veces sobre el caldo, servida con verduras de temporada, garbanzos y carnes de pollo o cordero. Se cocina en un \"couscoussier\" de dos pisos. En Marruecos es plato de viernes, el día sagrado, y se comparte en familia." },
+            "Nigeria": { flag: "🇳🇬", capital: "Abuya", img: "jollof", comida: "Jollof rice", descripcion: "Arroz cocinado en una base de tomate, cebolla, pimiento scotch bonnet y especias, con ese característico sabor ahumado del fondo de la olla. Se sirve con pollo o pescado asado y plátanos fritos. Rivaliza con el jollof de Ghana en la mayor batalla culinaria de África." },
+            "Ethiopia": { flag: "🇪🇹", capital: "Adís Abeba", img: "doro", comida: "Injera con Doro Wat", descripcion: "El injera, un pan suave y esponjoso de teff fermentado, sirve como plato y como cuchara para el doro wat, un guiso picante de pollo con berbere (mezcla de especias etíopes), cebolla y huevos duros. Se come con las manos, todos del mismo plato, en comunidad." },
+            "Kenya": { flag: "🇰🇪", capital: "Nairobi", img: "ugali", comida: "Ugali", descripcion: "Masa firme de harina de maíz hervida con agua y sal, de sabor neutro y textura semejante a un puré denso. Se toma con las manos y acompaña guisos, verduras, pescado o carne. Es el alimento básico diario en Kenia y en todo el este de África." },
+            "China": { flag: "🇨🇳", capital: "Pekín", img: "pato", comida: "Pato laqueado", descripcion: "Pato asado hasta lograr una piel crujiente y caramelizada de color caoba, cortado en finas láminas ante el comensal. Se envuelve en panqueques finos con cebollino, pepino y salsa de ciruela. Es plato ceremonial de Pekín desde la dinastía Yuan, hace más de setecientos años." },
+            "Japan": { flag: "🇯🇵", capital: "Tokio", img: "sushi", comida: "Sushi", descripcion: "Arroz avinagrado y ligeramente dulce, combinado con pescado fresco o mariscos, en formas de nigiri, maki o temaki. Se acompaña de wasabi, jengibre encurtido y salsa de soja. La maestría del itamae (chef) y la frescura del pescado marcan la diferencia." },
+            "South Korea": { flag: "🇰🇷", capital: "Seúl", img: "bulgogi", comida: "Bulgogi", descripcion: "Láminas finas de carne de res marinadas en soja, azúcar, ajo, sésamo y pera rallada, que asadas a la parrilla quedan dulces, jugosas y tiernas. Se come envuelto en hojas de lechuga con ajo y kimchi. Su nombre significa literalmente \"carne de fuego\"." },
+            "India": { flag: "🇮🇳", capital: "Nueva Delhi", img: "curry", comida: "Curry de pollo", descripcion: "Pollo guisado en una salsa especiada de cúrcuma, comino, jengibre, ajo, garam masala y tomate o yogur. En el norte de India es espeso y cremoso (como el makhani); en el sur, más líquido y picante. Se come con naan o arroz basmati fragante." },
+            "Thailand": { flag: "🇹🇭", capital: "Bangkok", img: "padthai", comida: "Pad Thai", descripcion: "Fideos de arroz salteados en wok con camarones o pollo, huevo, tofu, brotes de soja y brotes verdes, en una salsa de tamarindo, azúcar y pescado. Se sirve con lima, maní tostado y chiles. Es el equilibrio perfecto entre dulce, ácido, salado y picante." },
+            "Vietnam": { flag: "🇻🇳", capital: "Hanói", img: "pho", comida: "Pho", descripcion: "Sopa aromática de caldo de res o pollo con fideos de arroz, hierbas frescas como albahaca y menta, lima y brotes. El caldo hierve durante horas con anís estrellado, canela y clavo. Es el desayuno nacional y se vende temprano en puestos callejeros de todo el país." },
+            "Philippines": { flag: "🇵🇭", capital: "Manila", img: "adobo", comida: "Adobo", descripcion: "Pollo o cerdo guisado en vinagre de caña, salsa de soja, ajo y pimienta, hasta que los jugos se concentran. Fue un método de conservación local, bautizado por los colonos españoles. Cada hogar tiene su versión, por eso se le llama \"el plato no oficial nacional\"." },
+            "Indonesia": { flag: "🇮🇩", capital: "Yakarta", img: "nasigoreng", comida: "Nasi Goreng", descripcion: "Arroz frito a fuego alto con huevo, verduras y sambal (pasta de chile rojo), a menudo con pollo o camarones. Se corona con un huevo frito, kerupuk (galletas de camarón) y rodajas de pepino. Se considera un desayuno abundante aunque se disfruta a cualquier hora." },
+            "Malaysia": { flag: "🇲🇾", capital: "Kuala Lumpur", img: "nasilemak", comida: "Nasi Lemak", descripcion: "Arroz cocido en leche de coco y hoja de pandan, que le da un aroma especial, servido con sambal, anchoas fritas, cacahuates, huevo y pepino. Tradicionalmente se envuelve en hoja de plátano. Está considerado el plato nacional de Malasia." },
+            "Australia": { flag: "🇦🇺", capital: "Canberra", img: "meatpie", comida: "Meat pie", descripcion: "Hojaldre dorado relleno de carne de res guisada en una salsa espesa, a veces con champiñones y cebolla. Se come caliente con salsa de tomate por encima y es el refrigerio clásico en los partidos de rugby. Para muchos, es el plato nacional australiano." },
+            "New Zealand": { flag: "🇳🇿", capital: "Wellington", img: "hangi", comida: "Hangi", descripcion: "Cordero, cerdo, pollo, kumara (batata) y calabaza se cocinan bajo tierra en un horno maorí con piedras calentadas al fuego. Se cubren con hojas y tierra y se dejan entre tres y cuatro horas. Es más que comida: es una ceremonia y celebración comunitaria para ocasiones especiales." },
+            "Canada": { flag: "🇨🇦", capital: "Ottawa", img: "poutine", comida: "Poutine", descripcion: "Papas fritas cubiertas de queso en grano (curds) de leche fresca y una salsa gravy caliente que lo funde todo. Nació en Quebec en los años cincuenta. Hoy se reinventa con pollo, panceta, champiñones o cebolla caramelizada." },
+            "United States of America": { flag: "🇺🇸", capital: "Washington D. C.", img: "hamburguesa", comida: "Hamburguesa", descripcion: "Pan de bollo con carne de res a la parrilla, queso, lechuga, tomate, cebolla y salsas de todo tipo. Nació en Estados Unidos a inicios del siglo XX y hoy tiene infinitas versiones en cadenas, bares y restaurantes gourmet. Es el símbolo mundial de la comida rápida." },
+            "South Africa": { flag: "🇿🇦", capital: "Pretoria", img: "bobotie", comida: "Bobotie", descripcion: "Carne picada condimentada con curry, cebolla, chutney y pasas, cubierta con una mezcla de huevo y leche que se hornea hasta formar una costra dorada. Es herencia de la comunidad malaya del Cabo. Se sirve con arroz amarillo y chutney." },
+            "Israel": { flag: "🇮🇱", capital: "Jerusalén", img: "falafel", comida: "Falafel", descripcion: "Bolitas fritas de garbanzos o habas mezcladas con ajo, perejil y comino: doradas, crujientes y esponjosas por dentro. Se sirven dentro de pan pita con tahini, ensalada, pepinillos y hummus. Este clásico vegetariano del Medio Oriente se vende en cada esquina." },
+            "Lebanon": { flag: "🇱🇧", capital: "Beirut", img: "tabbouleh", comida: "Tabbouleh", descripcion: "Ensalada donde el perejil fresco picado fino es la estrella, acompañado de bulgur, tomate, cebolla y aderezo de limón con aceite de oliva. Contrario a lo que muchos creen, se pone poco bulgur. Se come con hojas de lechuga o pan pita, como parte del mezze libanés." },
+            "Jamaica": { flag: "🇯🇲", capital: "Kingston", img: "jerk", comida: "Pollo Jerk", descripcion: "Pollo marinado en una pasta \"jerk\" de chile scotch bonnet, tomillo, cebollín, canela, clavo, jengibre y ajo, y asado lentamente sobre madera de pimiento, que le da su aroma ahumado y picante. Se sirve con arroz con guisantes (frijoles) y plátano frito." },
+            "Cuba": { flag: "🇨🇺", capital: "La Habana", img: "ropavieja", comida: "Ropa vieja", descripcion: "Carne de res desmechada guisada con tomate, cebolla, pimiento y ajo, hasta quedar tierna y melosa. Su nombre viene de su parecido con ropa rasgada y es de herencia española (originaria de Canarias). Se sirve con arroz blanco, frijoles negros y plátano maduro." },
+            "Dominican Republic": { flag: "🇩🇴", capital: "Santo Domingo", img: "bandera", comida: "La Bandera", descripcion: "El plato insignia dominicano: arroz blanco, habichuelas rojas guisadas y carne guisada (pollo, res o cerdo), a veces con ensalada y plátano maduro. Su nombre alude a los colores de la bandera tricolor: los rojos de la carne, los azules y blancos del arroz y las habichuelas. Se consume, casi sin excepción, al mediodía." },
+            "Puerto Rico": { flag: "🇵🇷", capital: "San Juan", img: "mofongo", comida: "Mofongo", descripcion: "Plátanos verdes fritos y machacados en pilón con ajo, aceite de oliva y chicharrón de cerdo, moldeados en forma de cúpula. Se rellena con camarones, pollo o carne, y a veces se baña en un caldo de sopa. Hereda la tradición del fufú africano y la mano taína." }
+        };
+
+        // Nombres en espanol para la busqueda
+        const nombreEspanol = {
+            'El Salvador': 'El Salvador', Guatemala: 'Guatemala', Honduras: 'Honduras',
+            Nicaragua: 'Nicaragua', 'Costa Rica': 'Costa Rica', Panama: 'Panama',
+            Colombia: 'Colombia', Venezuela: 'Venezuela', Ecuador: 'Ecuador', Peru: 'Peru',
+            Brazil: 'Brasil', Bolivia: 'Bolivia', Paraguay: 'Paraguay', Uruguay: 'Uruguay',
+            Argentina: 'Argentina', Chile: 'Chile', Mexico: 'Mexico', Spain: 'España',
+            Italy: 'Italia', France: 'Francia', Germany: 'Alemania', 'United Kingdom': 'Reino Unido',
+            Ireland: 'Irlanda', Portugal: 'Portugal', Netherlands: 'Países Bajos',
+            Belgium: 'Belgica', Switzerland: 'Suiza', Turkey: 'Turquía', Greece: 'Grecia',
+            Sweden: 'Suecia', Norway: 'Noruega', Finland: 'Finlandia', Poland: 'Polonia',
+            Russia: 'Rusia', Czechia: 'República Checa', Hungary: 'Hungría', Egypt: 'Egipto',
+            Morocco: 'Marruecos', Nigeria: 'Nigeria', Ethiopia: 'Etiopía', Kenya: 'Kenia',
+            China: 'China', Japan: 'Japón', 'South Korea': 'Corea del Sur', India: 'India',
+            Thailand: 'Tailandia', Vietnam: 'Vietnam', Philippines: 'Filipinas',
+            Indonesia: 'Indonesia', Malaysia: 'Malasia', Australia: 'Australia',
+            'New Zealand': 'Nueva Zelanda', Canada: 'Canadá',
+            'United States of America': 'Estados Unidos', 'South Africa': 'Sudáfrica',
+            Israel: 'Israel', Lebanon: 'Líbano', Jamaica: 'Jamaica', Cuba: 'Cuba',
+            'Dominican Republic': 'República Dominicana', 'Puerto Rico': 'Puerto Rico'
+        };
 
         const colorPalette = [
             '#4fc3f7', '#81c784', '#ffb74d', '#e57373',
@@ -338,6 +483,27 @@
 
             document.getElementById('infoName').textContent = name;
             document.getElementById('infoDetails').innerHTML = details;
+
+            // Mostrar gastronomia si el pais tiene datos registrados
+            const comida = comidaPorPais[name];
+            const foodBlock = document.getElementById('foodBlock');
+            if (comida) {
+                document.getElementById('foodFlag').textContent = comida.flag;
+                document.getElementById('foodTitle').textContent = '🍽️ ' + comida.comida;
+                document.getElementById('foodCapital').textContent = '🏛️ Capital: ' + comida.capital;
+                const photo = document.getElementById('foodPhoto');
+                photo.src = 'img/' + comida.img + '.jpg';
+                photo.alt = 'Foto de ' + comida.comida;
+                photo.style.display = 'block';
+                document.getElementById('foodDesc').textContent = comida.descripcion;
+                foodBlock.style.display = 'block';
+                document.getElementById('foodSep').style.display = '';
+            } else {
+                foodBlock.style.display = 'none';
+                document.getElementById('foodPhoto').style.display = 'none';
+                document.getElementById('foodSep').style.display = 'none';
+            }
+
             panel.classList.add('active');
         }
 
@@ -363,7 +529,8 @@
             }
 
             const matches = allCountries.filter(c =>
-                c.name.toLowerCase().includes(query)
+                c.name.toLowerCase().includes(query) ||
+                (nombreEspanol[c.name] && nombreEspanol[c.name].toLowerCase().includes(query))
             ).slice(0, 8);
 
             if (matches.length === 0) {
@@ -374,7 +541,8 @@
             matches.forEach(match => {
                 const div = document.createElement('div');
                 div.className = 'search-result-item';
-                div.textContent = match.name;
+                const displayName = nombreEspanol[match.name] || match.name;
+                div.textContent = displayName;
                 div.addEventListener('click', () => {
                     if (selectedLayer) {
                         geojsonLayer.resetStyle(selectedLayer);
@@ -396,7 +564,7 @@
                     const center = bounds.getCenter();
                     showInfoPanel(match.name, match.feature.properties, center);
 
-                    searchInput.value = match.name;
+                    searchInput.value = nombreEspanol[match.name] || match.name;
                     searchResults.classList.remove('active');
                 });
                 searchResults.appendChild(div);
