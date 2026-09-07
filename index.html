@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mariangel - Mapa Mundial Interactivo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: #1a1a2e;
+        }
+
+        #map {
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        .search-container {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: 280px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 25px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+
+        .search-box::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .search-box:focus {
+            border-color: #4fc3f7;
+            box-shadow: 0 0 20px rgba(79, 195, 247, 0.3);
+            width: 320px;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 45px;
+            left: 0;
+            width: 100%;
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            overflow: hidden;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 10px 16px;
+            color: #fff;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.2s;
+        }
+
+        .search-result-item:hover {
+            background: rgba(79, 195, 247, 0.2);
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .country-tooltip {
+            position: absolute;
+            z-index: 1001;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: 600;
+            pointer-events: none;
+            transform: translate(-50%, -100%);
+            margin-top: -15px;
+            border: 1px solid rgba(79, 195, 247, 0.4);
+            box-shadow: 0 4px 20px rgba(79, 195, 247, 0.3);
+            white-space: nowrap;
+            transition: opacity 0.2s ease;
+        }
+
+        .country-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid rgba(0, 0, 0, 0.85);
+        }
+
+        .leaflet-container {
+            background: #0d1b2a;
+        }
+
+        .leaflet-control-zoom a {
+            background: rgba(0, 0, 0, 0.7) !important;
+            color: #fff !important;
+            border-color: rgba(255,255,255,0.2) !important;
+        }
+
+        .info-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            padding: 16px 20px;
+            border-radius: 14px;
+            min-width: 200px;
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+            display: none;
+        }
+
+        .info-panel.active {
+            display: block;
+        }
+
+        .info-panel h3 {
+            color: #4fc3f7;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .info-panel p {
+            font-size: 13px;
+            line-height: 1.6;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .info-panel .close-btn {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            cursor: pointer;
+            color: rgba(255,255,255,0.5);
+            font-size: 18px;
+        }
+
+        .info-panel .close-btn:hover {
+            color: #fff;
+        }
+
+        .title-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%);
+            padding: 10px 0 25px 0;
+            text-align: center;
+        }
+
+        .title-bar h1 {
+            font-size: 11px;
+            color: rgba(255,255,255,0.35);
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="title-bar">
+        <h1>Mariangel</h1>
+    </div>
+
+    <div class="search-container">
+        <input type="text" class="search-box" id="searchInput" placeholder="Buscar pais..." autocomplete="off">
+        <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="country-tooltip" id="tooltip"></div>
+
+    <div class="info-panel" id="infoPanel">
+        <span class="close-btn" onclick="closeInfoPanel()">&times;</span>
+        <h3 id="infoName"></h3>
+        <p id="infoDetails"></p>
+    </div>
+
+    <script>
+        const map = L.map('map', {
+            center: [20, 0],
+            zoom: 3,
+            minZoom: 2,
+            maxZoom: 8,
+            zoomControl: true,
+            worldCopyJump: true
+        });
+
+        L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+            maxZoom: 17,
+            attribution: 'OpenTopoMap'
+        }).addTo(map);
+
+        const tooltip = document.getElementById('tooltip');
+        let selectedLayer = null;
+        let allCountries = [];
+        let geojsonLayer = null;
+
+        const colorPalette = [
+            '#4fc3f7', '#81c784', '#ffb74d', '#e57373',
+            '#ba68c8', '#4dd0e1', '#fff176', '#f06292',
+            '#aed581', '#ff8a65', '#9575cd', '#4db6ac'
+        ];
+
+        let colorIndex = 0;
+        function getNextColor() {
+            const color = colorPalette[colorIndex % colorPalette.length];
+            colorIndex++;
+            return color;
+        }
+
+        fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
+            .then(r => r.json())
+            .then(data => {
+                geojsonLayer = L.geoJSON(data, {
+                    style: feature => ({
+                        fillColor: 'transparent',
+                        weight: 1,
+                        opacity: 0.4,
+                        color: 'rgba(255,255,255,0.3)',
+                        fillOpacity: 0
+                    }),
+                    onEachFeature: (feature, layer) => {
+                        const name = feature.properties.ADMIN || feature.properties.name || 'Desconocido';
+                        allCountries.push({ name, layer, feature });
+
+                        layer.on('mouseover', function (e) {
+                            if (layer !== selectedLayer) {
+                                this.setStyle({
+                                    weight: 2,
+                                    color: '#4fc3f7',
+                                    fillOpacity: 0.1,
+                                    fillColor: '#4fc3f7'
+                                });
+                                this.bringToFront();
+                            }
+                        });
+
+                        layer.on('mouseout', function (e) {
+                            if (layer !== selectedLayer) {
+                                geojsonLayer.resetStyle(this);
+                            }
+                        });
+
+                        layer.on('mousemove', function (e) {
+                            tooltip.style.display = 'block';
+                            tooltip.textContent = name;
+                            tooltip.style.left = e.originalEvent.clientX + 'px';
+                            tooltip.style.top = e.originalEvent.clientY + 'px';
+                        });
+
+                        layer.on('mouseout', function () {
+                            tooltip.style.display = 'none';
+                        });
+
+                        layer.on('click', function (e) {
+                            if (selectedLayer) {
+                                geojsonLayer.resetStyle(selectedLayer);
+                            }
+
+                            const fillColor = getNextColor();
+                            this.setStyle({
+                                weight: 3,
+                                color: fillColor,
+                                fillOpacity: 0.3,
+                                fillColor: fillColor
+                            });
+                            this.bringToFront();
+                            selectedLayer = this;
+
+                            const bounds = this.getBounds();
+                            const center = bounds.getCenter();
+                            map.flyToBounds(bounds, { padding: [50, 50], duration: 1 });
+
+                            showInfoPanel(name, feature.properties, center);
+                        });
+                    }
+                }).addTo(map);
+            })
+            .catch(err => {
+                console.error('Error cargando GeoJSON:', err);
+                map.whenReady(() => {
+                    document.getElementById('map').innerHTML += 
+                        '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;z-index:999;font-size:18px;">Error cargando datos de paises.<br><small style="color:#aaa;">Verifica tu conexion a internet.</small></div>';
+                });
+            });
+
+        function showInfoPanel(name, properties, center) {
+            const panel = document.getElementById('infoPanel');
+            const details = [
+                properties.ADMIN ? `Nombre completo: ${properties.ADMIN}` : '',
+                properties.ISO_A3 ? `Codigo ISO: ${properties.ISO_A3}` : '',
+                `Coordenadas: ${center.lat.toFixed(2)}°, ${center.lng.toFixed(2)}°`
+            ].filter(Boolean).join('<br>');
+
+            document.getElementById('infoName').textContent = name;
+            document.getElementById('infoDetails').innerHTML = details;
+            panel.classList.add('active');
+        }
+
+        function closeInfoPanel() {
+            document.getElementById('infoPanel').classList.remove('active');
+            if (selectedLayer) {
+                geojsonLayer.resetStyle(selectedLayer);
+                selectedLayer = null;
+            }
+        }
+
+        // Search
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+
+        searchInput.addEventListener('input', function () {
+            const query = this.value.trim().toLowerCase();
+            searchResults.innerHTML = '';
+
+            if (query.length < 2) {
+                searchResults.classList.remove('active');
+                return;
+            }
+
+            const matches = allCountries.filter(c =>
+                c.name.toLowerCase().includes(query)
+            ).slice(0, 8);
+
+            if (matches.length === 0) {
+                searchResults.classList.remove('active');
+                return;
+            }
+
+            matches.forEach(match => {
+                const div = document.createElement('div');
+                div.className = 'search-result-item';
+                div.textContent = match.name;
+                div.addEventListener('click', () => {
+                    if (selectedLayer) {
+                        geojsonLayer.resetStyle(selectedLayer);
+                    }
+
+                    const fillColor = getNextColor();
+                    match.layer.setStyle({
+                        weight: 3,
+                        color: fillColor,
+                        fillOpacity: 0.3,
+                        fillColor: fillColor
+                    });
+                    match.layer.bringToFront();
+                    selectedLayer = match.layer;
+
+                    const bounds = match.layer.getBounds();
+                    map.flyToBounds(bounds, { padding: [50, 50], duration: 1 });
+
+                    const center = bounds.getCenter();
+                    showInfoPanel(match.name, match.feature.properties, center);
+
+                    searchInput.value = match.name;
+                    searchResults.classList.remove('active');
+                });
+                searchResults.appendChild(div);
+            });
+
+            searchResults.classList.add('active');
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.search-container')) {
+                searchResults.classList.remove('active');
+            }
+        });
+
+        searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                this.value = '';
+                searchResults.classList.remove('active');
+                this.blur();
+            }
+        });
+    </script>
+</body>
+</html>
