@@ -208,6 +208,12 @@
             margin-bottom: 10px;
             background: #2a2a4a;
             display: block;
+            cursor: zoom-in;
+            transition: filter 0.2s ease, transform 0.2s ease;
+        }
+
+        .info-panel .food-photo:hover {
+            filter: brightness(1.15);
         }
 
         .info-panel .food-desc {
@@ -340,6 +346,62 @@
             font-size: 11px;
         }
 
+        /* ===== Vista foto a pantalla completa (lightbox) ===== */
+        .photo-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2500;
+            background: rgba(0, 0, 10, 0.92);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            cursor: zoom-out;
+        }
+
+        .photo-overlay.active {
+            display: flex;
+        }
+
+        .photo-overlay .photo-full {
+            max-width: 92vw;
+            max-height: 86vh;
+            border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 20px 70px rgba(0, 0, 0, 0.8);
+            object-fit: contain;
+            background: #000;
+        }
+
+        .photo-overlay .photo-caption {
+            position: absolute;
+            bottom: 18px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: rgba(255,255,255,0.85);
+            font-size: 14px;
+            font-weight: 600;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.9);
+            padding: 0 20px;
+        }
+
+        .photo-overlay .photo-close {
+            position: absolute;
+            top: 14px;
+            right: 22px;
+            cursor: pointer;
+            color: rgba(255,255,255,0.7);
+            font-size: 34px;
+            line-height: 1;
+            transition: color 0.2s ease;
+        }
+
+        .photo-overlay .photo-close:hover {
+            color: #fff;
+        }
+
         .title-bar {
             position: fixed;
             top: 0;
@@ -395,7 +457,7 @@
             <div class="food-flag" id="foodFlag"></div>
             <div class="food-name" id="foodTitle"></div>
             <div class="food-capital" id="foodCapital"></div>
-            <img class="food-photo" id="foodPhoto" alt="Foto de la comida" style="display:none;" />
+            <img class="food-photo" id="foodPhoto" alt="Foto de la comida" style="display:none;" onclick="openPhotoView()" />
             <div class="food-card" id="foodCard"></div>
             <div class="food-desc" id="foodDesc"></div>
             <button class="ver-mas-btn" id="verMasBtn" onclick="openRegionsView()">Ver más</button>
@@ -410,6 +472,12 @@
             <div class="regions-grid" id="regionsGrid"></div>
             <div class="regions-note" id="regionsNote"></div>
         </div>
+    </div>
+
+    <div class="photo-overlay" id="photoOverlay">
+        <span class="photo-close" onclick="closePhotoView()">&times;</span>
+        <img class="photo-full" id="photoFullImg" alt="Foto de la comida en pantalla completa" />
+        <div class="photo-caption" id="photoCaption"></div>
     </div>
 
     <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
@@ -1289,6 +1357,31 @@
         function closeRegionsView() {
             document.getElementById('regionsOverlay').classList.remove('active');
         }
+
+        // ====== Vista de foto a pantalla completa (lightbox) ======
+        function openPhotoView() {
+            const photo = document.getElementById('foodPhoto');
+            const capt = document.getElementById('foodTitle');
+            if (photo.style.display === 'none' || !photo.src) return;
+            document.getElementById('photoFullImg').src = photo.src;
+            document.getElementById('photoFullImg').alt = photo.alt || 'Foto de la comida';
+            document.getElementById('photoCaption').textContent = capt.textContent || '';
+            document.getElementById('photoOverlay').classList.add('active');
+        }
+
+        function closePhotoView() {
+            document.getElementById('photoOverlay').classList.remove('active');
+        }
+
+        document.getElementById('photoOverlay').addEventListener('click', (ev) => {
+            if (ev.target === document.getElementById('photoOverlay')) closePhotoView();
+        });
+        document.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Escape') {
+                closePhotoView();
+                closeRegionsView();
+            }
+        });
 
         // ====== Busqueda ======
         const searchInput = document.getElementById('searchInput');
