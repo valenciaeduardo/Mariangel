@@ -217,6 +217,129 @@
             text-align: left;
         }
 
+        .info-panel .food-card {
+            display: none;
+            width: 100%;
+            height: 140px;
+            border-radius: 10px;
+            border: 2px dashed rgba(255,255,255,0.25);
+            background: linear-gradient(135deg, #1a2f63, #4a6cf7);
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #fff;
+            margin-bottom: 10px;
+            white-space: pre-line;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        .info-panel .ver-mas-btn {
+            display: block;
+            width: 100%;
+            margin-top: 12px;
+            padding: 9px 14px;
+            border: 1px solid rgba(79, 195, 247, 0.5);
+            border-radius: 10px;
+            background: rgba(79, 195, 247, 0.12);
+            color: #4fc3f7;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.25s ease;
+        }
+
+        .info-panel .ver-mas-btn:hover {
+            background: rgba(79, 195, 247, 0.3);
+        }
+
+        /* ===== Vista "Ver mas": informacion por regiones ===== */
+        .regions-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background: rgba(0, 0, 20, 0.75);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .regions-overlay.active {
+            display: flex;
+        }
+
+        .regions-card {
+            background: rgba(12, 14, 40, 0.97);
+            border: 1px solid rgba(79, 195, 247, 0.35);
+            border-radius: 16px;
+            max-width: 720px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 22px 26px;
+            color: #fff;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            position: relative;
+        }
+
+        .regions-card h2 {
+            color: #4fc3f7;
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .regions-card .regions-sub {
+            color: rgba(255,255,255,0.55);
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .regions-card .regions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px;
+        }
+
+        .regions-card .region-item {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 9px 12px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .regions-card .region-item b {
+            color: #ffb74d;
+        }
+
+        .regions-card .region-item small {
+            display: block;
+            color: rgba(255,255,255,0.55);
+        }
+
+        .regions-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            cursor: pointer;
+            color: rgba(255,255,255,0.5);
+            font-size: 22px;
+        }
+
+        .regions-close:hover {
+            color: #fff;
+        }
+
+        .regions-note {
+            margin-top: 14px;
+            color: rgba(255,255,255,0.4);
+            font-size: 11px;
+        }
+
         .title-bar {
             position: fixed;
             top: 0;
@@ -273,7 +396,19 @@
             <div class="food-name" id="foodTitle"></div>
             <div class="food-capital" id="foodCapital"></div>
             <img class="food-photo" id="foodPhoto" alt="Foto de la comida" style="display:none;" />
+            <div class="food-card" id="foodCard"></div>
             <div class="food-desc" id="foodDesc"></div>
+            <button class="ver-mas-btn" id="verMasBtn" onclick="openRegionsView()">Ver más</button>
+        </div>
+    </div>
+
+    <div class="regions-overlay" id="regionsOverlay">
+        <div class="regions-card">
+            <span class="regions-close" onclick="closeRegionsView()">&times;</span>
+            <h2 id="regionsTitle"></h2>
+            <div class="regions-sub" id="regionsSub"></div>
+            <div class="regions-grid" id="regionsGrid"></div>
+            <div class="regions-note" id="regionsNote"></div>
         </div>
     </div>
 
@@ -416,7 +551,7 @@
             'Equatorial Guinea': ['Malabo', 'Succotash de Guinea', 'Guiso de maíz y frijoles con pescado y plátano.'],
             'Eritrea': ['Asmara', 'Zigni', 'Estofado picante de carne con berbere y injera.'],
             'Estonia': ['Tallin', 'Verivorst', 'Morcilla de cebada servida con salsa de arándanos.'],
-            'Eswatini': ['Mbabane', 'Umncweba', 'Carne seca y especiada que recuerda al biltong.'],
+            'eSwatini': ['Mbabane', 'Umncweba', 'Carne seca y especiada que recuerda al biltong.'],
             'Ethiopia': ['Adís Abeba', 'Doro Wat', 'Guiso de pollo picante con huevo, servido en injera.'],
             'Fiji': ['Suva', 'Kokoda', 'Pescado crudo marinado en lima y leche de coco.'],
             'Finland': ['Helsinki', 'Kalakukko', 'Pan de centeno relleno de pescado y tocino.'],
@@ -617,6 +752,209 @@
             'Bir Tawil': ['Sin capital', 'Raciones de Frontera', 'Zona inhabitada sin cocina local establecida.']
         };
 
+        // Divisiones internas principales por pais: [["Region", "Capital regional"], ...]
+        const regionesPorPais = {
+            'Afghanistan': [['Provincia de Kabul', 'Kabul'], ['Provincia de Herat', 'Herat'], ['Provincia de Kandahar', 'Kandahar'], ['Provincia de Balkh', 'Mazar-i-Sharif'], ['Provincia de Nangarhar', 'Jalalabad']],
+            'Albania': [['Condado de Tirana', 'Tirana'], ['Condado de Durrës', 'Durrës'], ['Condado de Fier', 'Fier'], ['Vlorë', 'Vlorë'], ['Shkodër', 'Shkodër']],
+            'Algeria': [['Provincia de Argel', 'Argel'], ['Provincia de Orán', 'Orán'], ['Provincia de Constantina', 'Constantina'], ['Provincia de Annaba', 'Annaba'], ['Provincia de Tlemecén', 'Tlemecén']],
+            'Andorra': [['Andorra la Vieja', 'Andorra la Vieja'], ['Canillo', 'Canillo'], ['Encamp', 'Encamp'], ['La Massana', 'La Massana'], ['Ordino', 'Ordino']],
+            'Angola': [['Luanda', 'Luanda'], ['Huambo', 'Huambo'], ['Benguela', 'Benguela'], ['Lubango (Huíla)', 'Lubango'], ['Cabinda', 'Cabinda']],
+            'Antigua and Barbuda': [['Saint John', 'Saint John\'s'], ['Saint George', 'Fitches Creek'], ['Nuestra Señora de las Nieves (Barbuda)', 'Codrington']],
+            'Armenia': [['Ereván', 'Ereván'], ['Armavir', 'Armavir'], ['Gegharkunik', 'Gavar'], ['Syunik', 'Kapan'], ['Shirak', 'Gyumri']],
+            'Austria': [['Viena', 'Viena'], ['Baja Austria', 'Sankt Pölten'], ['Alta Austria', 'Linz'], ['Salzburgo', 'Salzburgo'], ['Tirol', 'Innsbruck']],
+            'Azerbaijan': [['Bakú', 'Bakú'], ['Gəncə', 'Gəncə'], ['Sumqayıt', 'Sumqayıt'], ['Lənkəran', 'Lənkəran'], ['Şəki', 'Şəki']],
+            'The Bahamas': [['Nueva Providencia', 'Nasáu'], ['Gran Bahama', 'Freeport'], ['Andros', 'Cockburn Town'], ['Eleuthera', 'Governor\'s Harbour']],
+            'Bahrain': [['Capital (Manama)', 'Manama'], ['Muharraq', 'Al Muharraq'], ['Norte', 'Khalifa']],
+            'Bangladesh': [['Daca', 'Daca'], ['Chittagong', 'Chattogram'], ['Rajshahi', 'Rajshahi'], ['Khulna', 'Khulna'], ['Sylhet', 'Sylhet']],
+            'Barbados': [['Christ Church', 'Oistins'], ['Saint Michael', 'Bridgetown'], ['Saint George', 'Bissox Hill']],
+            'Belarus': [['Región de Minsk', 'Minsk'], ['Región de Brest', 'Brest'], ['Región de Gómel', 'Gómel'], ['Región de Vítebsk', 'Vítebsk'], ['Región de Grodno', 'Grodno']],
+            'Belgium': [['Región de Bruselas', 'Bruselas'], ['Flandes', 'Bruselas'], ['Valonia', 'Namur']],
+            'Belize': [['Distrito de Belice', 'Ciudad de Belice'], ['Cayo', 'San Ignacio'], ['Stann Creek', 'Dangriga'], ['Toledo', 'Punta Gorda']],
+            'Benin': [['Departamento de Littoral', 'Cotonú'], ['Departamento de Ouémé', 'Porto-Novo'], ['Departamento de Borgou', 'Parakou'], ['Departamento de Atlantique', 'Allada']],
+            'Bhutan': [['Thimpu', 'Thimpu'], ['Trashiyangtse', 'Trashiyangtse'], ['Paro', 'Paro'], ['Punakha', 'Punakha']],
+            'Bolivia': [['La Paz', 'La Paz'], ['Santa Cruz', 'Santa Cruz de la Sierra'], ['Cochabamba', 'Cochabamba'], ['Potosí', 'Potosí'], ['Sucre (Chuquisaca)', 'Sucre']],
+            'Bosnia and Herzegovina': [['Federación de Bosnia y Herzegovina', 'Sarajevo'], ['República Srpska', 'Sarajevo'], ['Distrito de Brčko', 'Brčko']],
+            'Botswana': [['Distrito de Gaborone', 'Gaborone'], ['Distrito de Francistown', 'Francistown'], ['Distrito de Maun (Noroeste)', 'Maun'], ['Distrito de Kgalagadi', 'Tshabong']],
+            'Brazil': [['São Paulo', 'São Paulo'], ['Río de Janeiro', 'Río de Janeiro'], ['Brasilia (DF)', 'Brasilia'], ['Minas Gerais', 'Belo Horizonte'], ['Bahía', 'Salvador']],
+            'Brunei': [['Distrito de Brunei-Muara', 'Bandar Seri Begawan'], ['Distrito de Belait', 'Kuala Belait'], ['Distrito de Tutong', 'Pekan Tutong']],
+            'Bulgaria': [['Provincia de Sofía', 'Sofía'], ['Provincia de Plovdiv', 'Plovdiv'], ['Provincia de Varna', 'Varna'], ['Provincia de Burgas', 'Burgas']],
+            'Burkina Faso': [['Región de Hauts-Bassins', 'Bobo-Dioulasso'], ['Región de Centro', 'Uagadugú'], ['Región de Boucle du Mouhoun', 'Dédougou']],
+            'Burundi': [['Provincia de Mairie de Buyumbura', 'Buyumbura'], ['Provincia de Gitega', 'Gitega'], ['Provincia de Ngozi', 'Ngozi']],
+            'Cabo Verde': [['São Vicente', 'Mindelo'], ['Santiago', 'Praia'], ['Sal', 'Espargos'], ['Boa Vista', 'Sal Rei']],
+            'Cambodia': [['Provincia de Phnom Penh', 'Phnom Penh'], ['Provincia de Siem Reap', 'Siem Reap'], ['Provincia de Battambang', 'Battambang'], ['Provincia de Kampot', 'Kampot']],
+            'Cameroon': [['Región del Centro', 'Yaundé'], ['Región del Litoral', 'Duala'], ['Región del Norte', 'Garua'], ['Región del Oeste', 'Bafoussam']],
+            'Canada': [['Ontario', 'Toronto'], ['Quebec', 'Ciudad de Quebec'], ['Columbia Británica', 'Victoria'], ['Alberta', 'Edmonton'], ['Nueva Escocia', 'Halifax']],
+            'Central African Republic': [['Ombella-M\'Poko', 'Bimbo'], ['Ouham', 'Bozoum'], ['Bangui', 'Bangui']],
+            'Chad': [['Provincia de Yamena', 'Yamena'], ['Provincia de Ouaddaï', 'Abéché'], ['Provincia de Logone Occidental', 'Moundou'], ['Provincia de Kanem', 'Mao']],
+            'Chile': [['Región Metropolitana', 'Santiago'], ['Valparaíso', 'Valparaíso'], ['Biobío', 'Concepción'], ['Araucanía', 'Temuco'], ['Tarapacá', 'Iquique']],
+            'China': [['Pekín', 'Pekín'], ['Shanghái', 'Shanghái'], ['Sichuan', 'Chengdú'], ['Guangdong', 'Cantón'], ['Yunnan', 'Kunming']],
+            'Colombia': [['Bogotá D.C.', 'Bogotá'], ['Antioquia', 'Medellín'], ['Valle del Cauca', 'Cali'], ['Atlántico', 'Barranquilla'], ['Santander', 'Bucaramanga']],
+            'Comoros': [['Gran Comora', 'Moroni'], ['Anjouan', 'Mutsamudu'], ['Mohéli', 'Fomboni']],
+            'Republic of the Congo': [['Departamento de Brazzaville', 'Brazzaville'], ['Departamento de Pointe-Noire', 'Pointe-Noire'], ['Departamento de Pool', 'Kinkala']],
+            'Democratic Republic of the Congo': [['Kinsasa', 'Kinsasa'], ['Kivu Norte', 'Goma'], ['Kivu Sur', 'Bukavu'], ['Katanga', 'Lubumbashi'], ['Oriental', 'Kisangani']],
+            'Costa Rica': [['San José', 'San José'], ['Alajuela', 'Alajuela'], ['Cartago', 'Cartago'], ['Heredia', 'Heredia'], ['Guanacaste', 'Liberia']],
+            'Ivory Coast': [['Distrito de Abiyán', 'Abiyán'], ['Yamoussoukro (Distrito)', 'Yamoussoukro'], ['Distrito de Bouaké (Vallée du Bandama)', 'Bouaké'], ['Distrito de Daloa (Sassandra-Marahoué)', 'Daloa']],
+            'Croatia': [['Condado de Zagreb', 'Zagreb'], ['Condado de Split-Dalmacia', 'Split'], ['Condado de Primorje-Gorski Kotar', 'Rijeka'], ['Condado de Osijek-Baranya', 'Osijek']],
+            'Cuba': [['La Habana', 'La Habana'], ['Santiago de Cuba', 'Santiago de Cuba'], ['Camagüey', 'Camagüey'], ['Holguín', 'Holguín'], ['Matanzas', 'Matanzas']],
+            'Curaçao': [['Willemstad', 'Willemstad'], ['Bandabou', 'Barber']],
+            'Cyprus': [['Distrito de Nicosia', 'Nicosia'], ['Distrito de Limasol', 'Limasol'], ['Distrito de Lárnaca', 'Lárnaca'], ['Distrito de Pafos', 'Pafos']],
+            'Czechia': [['Praga', 'Praga'], ['Moravia Meridional', 'Brno'], ['Moravia-Silesia', 'Ostrava'], ['Bohemia Central', 'Praga']],
+            'Denmark': [['Región Capital', 'Hillerød'], ['Jutlandia Central', 'Viborg'], ['Jutlandia Septentrional', 'Aalborg'], ['Dinamarca Meridional', 'Vejle']],
+            'Djibouti': [['Yibuti', 'Yibuti'], ['Ali Sabieh', 'Ali Sabieh'], ['Tadjoura', 'Tadjoura'], ['Obock', 'Obock']],
+            'Dominica': [['Saint George', 'Roseau'], ['Saint Andrew', 'Marigot'], ['Saint Paul', 'Pont Cassé'], ['Saint David', 'Castle Bruce']],
+            'Dominican Republic': [['Distrito Nacional', 'Santo Domingo'], ['Santiago', 'Santiago de los Caballeros'], ['La Altagracia', 'Higüey'], ['Puerto Plata', 'Puerto Plata'], ['San Pedro de Macorís', 'San Pedro de Macorís']],
+            'East Timor': [['Dili', 'Dili'], ['Baucau', 'Baucau'], ['Ermera', 'Gleno'], ['Liquiçá', 'Liquiçá']],
+            'Ecuador': [['Pichincha', 'Quito'], ['Guayas', 'Guayaquil'], ['Azuay', 'Cuenca'], ['Manabí', 'Portoviejo']],
+            'Egypt': [['Gobernación de El Cairo', 'El Cairo'], ['Gobernación de Alejandría', 'Alejandría'], ['Gobernación de Giza', 'Guiza'], ['Gobernación de Luxor', 'Luxor']],
+            'El Salvador': [['San Salvador', 'San Salvador'], ['La Libertad', 'Santa Tecla'], ['Santa Ana', 'Santa Ana'], ['San Miguel', 'San Miguel']],
+            'Equatorial Guinea': [['Annobón', 'San Antonio de Palé'], ['Bioko Norte', 'Malabo'], ['Litoral', 'Bata'], ['Centro Sur', 'Evínayong']],
+            'Eritrea': [['Maekel', 'Asmara'], ['Semienawi Keyih Bahri', 'Massawa'], ['Debub', 'Mendefera'], ['Gash-Barka', 'Barentú']],
+            'Estonia': [['Condado de Harju', 'Tallin'], ['Condado de Tartu', 'Tartu'], ['Condado de Pärnu', 'Pärnu'], ['Condado de Ida-Viru', 'Jõhvi']],
+            'eSwatini': [['Distrito de Hhohho', 'Mbabane'], ['Distrito de Manzini', 'Manzini'], ['Distrito de Shiselweni', 'Nhlangano'], ['Distrito de Lubombo', 'Siteki']],
+            'Ethiopia': [['Adís Abeba', 'Adís Abeba'], ['Amhara', 'Bahir Dar'], ['Oromía', 'Adama'], ['Tigray', 'Mekele'], ['Sidama', 'Hawassa']],
+            'Falkland Islands': [['Port Stanley', 'Stanley'], ['West Falkland', 'Port Howard'], ['East Falkland', 'Stanley']],
+            'Faroe Islands': [['Streymoy', 'Tórshavn'], ['Eysturoy', 'Fuglafjørður'], ['Vágar', 'Sørvágur'], ['Sandoy', 'Sandur']],
+            'Fiji': [['División Central', 'Suva'], ['División Occidental', 'Lautoka'], ['División Septentrional', 'Labasa'], ['División Oriental', 'Levuka']],
+            'Finland': [['Uusimaa', 'Helsinki'], ['Laponia', 'Rovaniemi'], ['Varsinais-Suomi', 'Turku'], ['Pirkanmaa', 'Tampere']],
+            'France': [['Isla de Francia', 'París'], ['Provenza-Alpes-Costa Azul', 'Marsella'], ['Auvernia-Ródano-Alpes', 'Lyon'], ['Occitania', 'Toulouse'], ['Nueva Aquitania', 'Burdeos']],
+            'Gabon': [['Estuario', 'Libreville'], ['Ogooué-Marítimo', 'Port-Gentil'], ['Haut-Ogooué', 'Franceville'], ['Woleu-Ntem', 'Oyem']],
+            'Gambia': [['División de Banjul', 'Banjul'], ['División de la Costa Occidental', 'Brikama'], ['División del Norte', 'Basse Santa Su'], ['División del RÍO Central', 'Janjanbureh']],
+            'Georgia': [['Tiflis', 'Tiflis'], ['Kajetia', 'Telavi'], ['Ayaria', 'Batumi'], ['Imericia', 'Kutaisi'], ['Samegrelo-Zemo Svaneti', 'Zugdidi']],
+            'Germany': [['Berlín', 'Berlín'], ['Baviera', 'Múnich'], ['Baden-Wurtemberg', 'Stuttgart'], ['Renania del Norte-Westfalia', 'Düsseldorf'], ['Sajonia', 'Dresde']],
+            'Ghana': [['Gran Accra', 'Acra'], ['Ashanti', 'Kumasi'], ['Occidental', 'Sekondi-Takoradi'], ['Central', 'Cape Coast'], ['Septentrional', 'Tamale']],
+            'Greece': [['Ática', 'Atenas'], ['Tesalia', 'Larisa'], ['Creta', 'Heraclión'], ['Macedonia Central', 'Salónica'], ['Pelopeoneso', 'Trípoli']],
+            'Grenada': [['Saint George', 'Saint George\'s'], ['Saint Andrew', 'Grenville'], ['Saint Patrick', 'Sauteurs']],
+            'Guatemala': [['Guatemala', 'Ciudad de Guatemala'], ['Alta Verapaz', 'Cobán'], ['Petén', 'Flores'], ['Quetzaltenango', 'Quetzaltenango'], ['Izabal', 'Puerto Barrios']],
+            'Guinea': [['Conakri', 'Conakri'], ['Nzérékoré', 'Nzérékoré'], ['Kankan', 'Kankan'], ['Labé', 'Labé']],
+            'Guinea-Bissau': [['Bafatá', 'Bafatá'], ['Gabú', 'Gabú'], ['Biombo', 'Quinhámel'], ['Bolama', 'Bolama']],
+            'Guyana': [['Demerara-Mahaica', 'Georgetown'], ['Essequibo Islands-West Demerara', 'Vreed en Hoop'], ['Pomeroon-Supenaam', 'Anna Regina'], ['Berbice Oriental-Corentyne', 'New Amsterdam']],
+            'Haiti': [['Ouest', 'Puerto Príncipe'], ['Artibonite', 'Gonaïves'], ['Norte', 'Cap-Haïtien'], ['Sud', 'Les Cayes']],
+            'Honduras': [['Francisco Morazán', 'Tegucigalpa'], ['Cortés', 'San Pedro Sula'], ['Atlántida', 'La Ceiba'], ['Yoro', 'Yoro']],
+            'Hungary': [['Condado de Pest', 'Budapest'], ['Condado de Borsod-Abaúj-Zemplén', 'Miskolc'], ['Condado de Csongrád-Csanád', 'Szeged'], ['Condado de Baranya', 'Pécs']],
+            'Iceland': [['Capital', 'Reikiavik'], ['Noroeste', 'Sauðárkrókur'], ['Nordeste', 'Akureyri'], ['Sur', 'Selfoss']],
+            'India': [['Delhi', 'Nueva Delhi'], ['Maharashtra', 'Bombay'], ['Uttar Pradesh', 'Lucknow'], ['Karnataka', 'Bengaluru'], ['Bengala Occidental', 'Calcuta']],
+            'Indonesia': [['Java Occidental', 'Bandung'], ['Java Central', 'Semarang'], ['Java Oriental', 'Surabaya'], ['Bali', 'Denpasar'], ['Sumatra Septentrional', 'Medán']],
+            'Iran': [['Provincia de Teherán', 'Teherán'], ['Provincia de Fars', 'Shiraz'], ['Provincia de Jorasán Razaví', 'Mashhad'], ['Provincia de Isfahán', 'Isfahán'], ['Provincia de Azerbaiyán Oriental', 'Tabriz']],
+            'Iraq': [['Bagdad', 'Bagdad'], ['Nínive', 'Mosul'], ['Basora', 'Basora'], ['Erbil', 'Erbil'], ['Náyaf', 'Náyaf']],
+            'Ireland': [['Leinster', 'Dublín'], ['Munster', 'Cork'], ['Connacht', 'Galway'], ['Ulster (parte)', 'Cavan']],
+            'Israel': [['Distrito de Tel Aviv', 'Tel Aviv'], ['Distrito de Jerusalén', 'Jerusalén'], ['Distrito de Haifa', 'Haifa'], ['Distrito del Norte', 'Nazaret'], ['Distrito del Sur', 'Beerseba']],
+            'Italy': [['Lacio', 'Roma'], ['Lombardía', 'Milán'], ['Campania', 'Nápoles'], ['Sicilia', 'Palermo'], ['Véneto', 'Venecia']],
+            'Jamaica': [['Condado de Middlesex', 'Spanish Town'], ['Condado de Surrey', 'Kingston'], ['Condado de Cornwall', 'Montego Bay']],
+            'Japan': [['Tokio', 'Tokio'], ['Osaka', 'Osaka'], ['Kioto', 'Kioto'], ['Hokkaidō', 'Sapporo'], ['Fukuoka', 'Fukuoka']],
+            'Jordan': [['Gobernación de Amán', 'Amán'], ['Gobernación de Irbid', 'Irbid'], ['Gobernación de Zarka', 'Zarka'], ['Gobernación de Aqaba', 'Aqaba']],
+            'Kazakhstan': [['Región de Almatý', 'Almatý'], ['Región de Astana', 'Astana'], ['Región de Karagandá', 'Karagandá'], ['Región de Turquestán', 'Turkestán']],
+            'Kenya': [['Condado de Nairobi', 'Nairobi'], ['Condado de Mombasa', 'Mombasa'], ['Condado de Nyeri (Condado Central)', 'Nyeri'], ['Condado de Kisumu', 'Kisumu'], ['Condado de Nakuru', 'Nakuru']],
+            'Kiribati': [['Islas Gilbert', 'Tarawa'], ['Islas Fénix', 'Cantón'], ['Islas de la Línea', 'Kiritimati']],
+            'Kuwait': [['Gobernación de Capital', 'Ciudad de Kuwait'], ['Gobernación de Hawalli', 'Hawalli'], ['Gobernación de Al Farwaniyah', 'Al Farwaniyah'], ['Gobernación de Mubarak Al-Kabeer', 'Mubarak Al-Kabeer']],
+            'Kyrgyzstan': [['Provincia de Chuy', 'Bishkek'], ['Provincia de Osh', 'Osh'], ['Provincia de Issyk-Kul', 'Karakol'], ['Provincia de Naryn', 'Naryn']],
+            'Laos': [['Prefectura de Vientián', 'Vientián'], ['Provincia de Luang Prabang', 'Luang Prabang'], ['Provincia de Savannakhet', 'Savannakhet'], ['Provincia de Champasak', 'Pakse']],
+            'Latvia': [['Planificación de Riga', 'Riga'], ['Planificación de Kurzeme', 'Liepāja'], ['Planificación de Vidzeme', 'Cēsis'], ['Planificación de Latgale', 'Daugavpils']],
+            'Lebanon': [['Gobernación del Monte Líbano', 'Baabda'], ['Gobernación de Beirut', 'Beirut'], ['Gobernación del Norte', 'Tripoli'], ['Gobernación del Sur', 'Sidón']],
+            'Lesotho': [['Distrito de Maseru', 'Maseru'], ['Distrito de Berea', 'Teyateyaneng'], ['Distrito de Leribe', 'Hlotse'], ['Distrito de Mafeteng', 'Mafeteng']],
+            'Liberia': [['Condado de Montserrado', 'Monrovia'], ['Condado de Grand Bassa', 'Buchanan'], ['Condado de Lofa', 'Voinjama'], ['Condado de Nimba', 'Sanniquellie']],
+            'Libya': [['Trípoli', 'Trípoli'], ['Bengasi', 'Bengasi'], ['Misurata', 'Misurata'], ['Sabha', 'Sabha']],
+            'Liechtenstein': [['Oberland (Distrito Electoral Alto)', 'Vaduz'], ['Unterland (Distrito Electoral Bajo)', 'Schellenberg']],
+            'Lithuania': [['Condado de Vilnius', 'Vilna'], ['Condado de Kaunas', 'Kaunas'], ['Condado de Klaipėda', 'Klaipėda'], ['Condado de Šiauliai', 'Šiauliai']],
+            'Luxembourg': [['Distrito de Luxemburgo', 'Luxemburgo'], ['Distrito de Grevenmacher', 'Grevenmacher'], ['Distrito de Diekirch', 'Diekirch']],
+            'Madagascar': [['Provincia de Antananarivo', 'Antananarivo'], ['Provincia de Toamasina', 'Toamasina'], ['Provincia de Antsiranana', 'Antsiranana'], ['Provincia de Toliara', 'Toliara'], ['Provincia de Fianarantsoa', 'Fianarantsoa']],
+            'Malawi': [['Región Central', 'Lilongüe'], ['Región Meridional', 'Blantyre'], ['Región Septentrional', 'Mzuzu']],
+            'Malaysia': [['Selangor', 'Shah Alam'], ['Kuala Lumpur', 'Kuala Lumpur'], ['Johor', 'Johor Bahru'], ['Sabah', 'Kota Kinabalu'], ['Sarawak', 'Kuching']],
+            'Maldives': [['Malé', 'Malé'], ['Addu', 'Addu City'], ['Lhaviyani', 'Naifaru'], ['Baa', 'Eydhafushi']],
+            'Mali': [['Distrito de Bamako', 'Bamako'], ['Región de Tombuctú', 'Tombuctú'], ['Región de Sikasso', 'Sikasso'], ['Región de Mopti', 'Mopti'], ['Región de Gao', 'Gao']],
+            'Malta': [['Región de Gozo', 'Victoria'], ['Región Sur', 'Qormi'], ['Región Centro', 'San Juan'], ['Región Norte', 'St. Paul\'s Bay']],
+            'Marshall Islands': [['Ratak (Cadena Oriental)', 'Majuro'], ['Ralik (Cadena Occidental)', 'Ebeye']],
+            'Mauritania': [['Región de Nuakchot', 'Nuakchot'], ['Región de Adrar', 'Atar'], ['Región del Assaba', 'Kiffa'], ['Región de Hodh el Charqui', 'Nema']],
+            'Mauritius': [['Distrito de Port Louis', 'Port Louis'], ['Distrito de Moka', 'Moka'], ['Distrito de Rivière du Rempart', 'Mapou'], ['Rodrigues', 'Port Mathurin']],
+            'Mexico': [['Ciudad de México', 'Ciudad de México'], ['Estado de México', 'Toluca'], ['Jalisco', 'Guadalajara'], ['Nuevo León', 'Monterrey'], ['Yucatán', 'Mérida']],
+            'Federated States of Micronesia': [['Estado de Chuuk', 'Weno'], ['Estado de Pohnpei', 'Palikir'], ['Estado de Kosrae', 'Tofol'], ['Estado de Yap', 'Colonia']],
+            'Moldova': [['Bălți', 'Bălți'], ['Cahul', 'Cahul'], ['Orhei', 'Orhei'], ['Chisináu', 'Chisináu']],
+            'Monaco': [['Monte-Carlo', 'Mónaco'], ['La Condamine', 'Mónaco']],
+            'Mongolia': [['Provincia de Töv', 'Zuunmod'], ['Provincia de Selenge', 'Sükhbaatar'], ['Provincia de Ömnögovi', 'Dalanzadgad'], ['Ulaanbaatar', 'Ulaanbaatar']],
+            'Montenegro': [['Muncipio de Podgorica', 'Podgorica'], ['Muncipio de Nikšić', 'Nikšić'], ['Muncipio de Bar', 'Bar'], ['Muncipio de Herceg Novi', 'Herceg Novi']],
+            'Morocco': [['Casablanca-Settat', 'Casablanca'], ['Rabat-Salé-Kenitra', 'Rabat'], ['Marrakech-Safí', 'Marrakech'], ['Tánger-Tetuán-Alhucemas', 'Tánger']],
+            'Mozambique': [['Provincia de Maputo', 'Matola'], ['Provincia de Sofala', 'Beira'], ['Provincia de Nampula', 'Nampula'], ['Provincia de Zambezia', 'Quelimane']],
+            'Myanmar': [['Región de Yangon', 'Yangón'], ['Región de Mandalay', 'Mandalay'], ['Estado de Shan', 'Taunggyi'], ['Naypídaw', 'Naypídaw']],
+            'Namibia': [['Región de Khomas', 'Windhoek'], ['Región de Erongo', 'Swakopmund'], ['Región de Oshana', 'Oshakati'], ['Región de Otjozondjupa', 'Otjiwarongo']],
+            'Nauru': [['Distrito de Yaren', 'Yaren'], ['Distrito de Aiwo', 'Aiwo'], ['Distrito de Boe', 'Boe']],
+            'Nepal': [['Provincia de Bagmati', 'Katmandú'], ['Provincia de Gandaki', 'Pokhara'], ['Provincia de Lumbini', 'Butwal'], ['Provincia de Sudurpashchim', 'Dhangadhi']],
+            'Netherlands': [['Holanda Septentrional', 'Haarlem'], ['Holanda Meridional', 'La Haya'], ['Utrecht', 'Utrecht'], ['Brabante Septentrional', 'Bolduque'], ['Limburgo', 'Maastricht']],
+            'New Zealand': [['Auckland', 'Auckland'], ['Wellington', 'Wellington'], ['Canterbury', 'Christchurch'], ['Waikato', 'Hamilton']],
+            'Nicaragua': [['Managua', 'Managua'], ['León', 'León'], ['Matagalpa', 'Matagalpa'], ['Masaya', 'Masaya'], ['Rivas', 'Rivas']],
+            'Niger': [['Niamey', 'Niamey'], ['Agadez', 'Agadez'], ['Zinder', 'Zinder'], ['Maradi', 'Maradi'], ['Tahoua', 'Tahoua']],
+            'Nigeria': [['Lagos', 'Ikeja'], ['Kano', 'Kano'], ['Abuya (FCT)', 'Abuya'], ['Rivers', 'Port Harcourt'], ['Oyo', 'Ibadán']],
+            'North Korea': [['Pionyang', 'Pionyang'], ['Hamgyong Sur', 'Hamhung'], ['Pyongan Sur', 'Pyongyang'], ['Rason', 'Rason']],
+            'North Macedonia': [['Región de Skopje', 'Skopie'], ['Región de Pelagonia', 'Bitola'], ['Región del Polog', 'Tetovo'], ['Región del Este', 'Stip']],
+            'Norway': [['Oslo', 'Oslo'], ['Vestland', 'Bergen'], ['Trøndelag', 'Trondheim'], ['Rogaland', 'Stavanger'], ['Troms og Finnmark', 'Tromsø']],
+            'Oman': [['Gobernación de Mascate', 'Mascate'], ['Gobernación de Dhofar', 'Salalah'], ['Gobernación de Musandam', 'Khasab'], ['Gobernación de Al Batinah Norte', 'Sohar']],
+            'Pakistan': [['Punyab', 'Lahore'], ['Sind', 'Karachi'], ['Jaiber Pajtunjuá', 'Peshawar'], ['Baluchistán', 'Quetta'], ['Islamabad', 'Islamabad']],
+            'Palau': [['Melekeok', 'Melekeok'], ['Koror', 'Koror'], ['Airai', 'Ngetkib'], ['Peleliu', 'Kloulklubed']],
+            'Palestine': [['Gobernación de Ramala y Al Bireh', 'Ramala'], ['Gobernación de Hebrón', 'Hebrón'], ['Gobernación de Nablus', 'Nablus'], ['Gobernación de Gaza', 'Gaza']],
+            'Panama': [['Panamá', 'Ciudad de Panamá'], ['Coclá', 'Penonomé'], ['Chiriquí', 'David'], ['Colón', 'Colón'], ['Veraguas', 'Santiago de Veraguas']],
+            'Papua New Guinea': [['NCD (Puerto Moresby)', 'Puerto Moresby'], ['Morobe', 'Lae'], ['Highlands Orientales', 'Goroka'], ['Simbu', 'Kundiawa'], ['Nueva Bretaña Oriental', 'Kokopo']],
+            'Paraguay': [['Capital (Distrito)', 'Asunción'], ['Central', 'Areguá'], ['Paraguarí', 'Paraguarí'], ['Itapúa', 'Encarnación'], ['Alto Paraná', 'Ciudad del Este']],
+            'Peru': [['Lima', 'Lima'], ['Arequipa', 'Arequipa'], ['Cusco', 'Cusco'], ['La Libertad', 'Trujillo'], ['Piura', 'Piura']],
+            'Philippines': [['NCR (Gran Manila)', 'Manila'], ['Cebu', 'Ciudad de Cebú'], ['Dávao', 'Dávao'], ['Ilocos', 'Laoag'], ['Luzón Central', 'San Fernando']],
+            'Poland': [['Voivodato de Mazovia', 'Varsovia'], ['Voivodato de Menor Polonia', 'Cracovia'], ['Voivodato de Silesia', 'Katowice'], ['Voivodato de Pomerania', 'Danzig'], ['Voivodato de Gran Polonia', 'Poznań']],
+            'Portugal': [['Lisboa', 'Lisboa'], ['Porto', 'Oporto'], ['Algarve', 'Faro'], ['Setúbal', 'Setúbal'], ['Coímbra', 'Coímbra']],
+            'Puerto Rico': [['San Juan', 'San Juan'], ['Ponce', 'Ponce'], ['Mayagüez', 'Mayagüez'], ['Arecibo', 'Arecibo'], ['Bayamón', 'Bayamón']],
+            'Qatar': [['Municipio de Doha', 'Doha'], ['Municipio de Al Rayyan', 'Al Rayyan'], ['Municipio de Al Wakrah', 'Al Wakrah'], ['Municipio de Umm Salal', 'Umm Salal']],
+            'Romania': [['Bucarest', 'Bucarest'], ['Cluj', 'Cluj-Napoca'], ['Timiș', 'Timișoara'], ['Iași', 'Iași'], ['Constanța', 'Constanța']],
+            'Russia': [['Moscú', 'Moscú'], ['San Petersburgo', 'San Petersburgo'], ['Tatarstán', 'Kazán'], ['Krasnodar', 'Krasnodar'], ['Primorie', 'Vladivostok']],
+            'Rwanda': [['Kigali', 'Kigali'], ['Provincia del Norte', 'Musanze'], ['Provincia del Sur', 'Nyanza'], ['Provincia del Este', 'Rwamagana'], ['Provincia del Oeste', 'Karongi']],
+            'Saint Kitts and Nevis': [['Parroquia de Saint George Basseterre', 'Basseterre'], ['Parroquia de Saint James Windward', 'Newcastle'], ['Nevis', 'Charlestown']],
+            'Saint Lucia': [['Quarter de Castries', 'Castries'], ['Quarter de Gros Islet', 'Gros Islet'], ['Quarter de Vieux Fort', 'Vieux Fort'], ['Quarter de Soufrière', 'Soufrière']],
+            'Saint Vincent and the Grenadines': [['Parroquia de Kingstown', 'Kingstown'], ['Parroquia de Charlotte', 'Georgetown'], ['Granadinas', 'Port Elizabeth']],
+            'Samoa': [['Upolu', 'Apia'], ['Savaii', 'Salelologo']],
+            'San Marino': [['Serravalle', 'Serravalle'], ['San Marino', 'San Marino'], ['Borgo Maggiore', 'Borgo Maggiore']],
+            'Saudi Arabia': [['Provincia de Riad', 'Riad'], ['Provincia de La Meca', 'La Meca'], ['Provincia de Medina', 'Medina'], ['Provincia Oriental', 'Dammán'], ['Provincia de Asir', 'Abha']],
+            'Senegal': [['Dakar', 'Dakar'], ['Thiès', 'Thiès'], ['Saint-Louis', 'Saint-Louis'], ['Ziguinchor', 'Ziguinchor']],
+            'Republic of Serbia': [['Belgrado', 'Belgrado'], ['Vojvodina', 'Novi Sad'], ['Distrito de Nišava', 'Niš'], ['Distrito de Šumadija', 'Kragujevac']],
+            'Seychelles': [['Mahé', 'Victoria'], ['Praslin', 'Grand Anse'], ['La Digue', 'La Passe']],
+            'Sierra Leone': [['Área Occidental', 'Freetown'], ['Provincia del Norte', 'Makeni'], ['Provincia del Sur', 'Bo'], ['Provincia del Este', 'Kenema']],
+            'Singapore': [['Región Central', 'Singapur'], ['Región Este', 'Tampines'], ['Región Oeste', 'Jurong East'], ['Región Nordeste', 'Hougang']],
+            'Slovakia': [['Región de Bratislava', 'Bratislava'], ['Región de Košice', 'Košice'], ['Región de Žilina', 'Žilina'], ['Región de Prešov', 'Prešov']],
+            'Slovenia': [['Municipio de Liubliana', 'Liubliana'], ['Municipio de Maribor', 'Maribor'], ['Municipio de Cerklje na Gorenjskem', 'Cerklje'], ['Región de Primorska', 'Koper']],
+            'Solomon Islands': [['Guadalcanal', 'Honiara'], ['Malaita', 'Auki'], ['Isabel', 'Buala'], ['Choiseul', 'Taro Island']],
+            'Somalia': [['Banaadir', 'Mogadiscio'], ['Puntlandia', 'Garoowe'], ['Somalilandia', 'Hargeisa'], ['Mudug', 'Galkayo']],
+            'South Africa': [['Gauteng', 'Johannesburgo'], ['Cabo Occidental', 'Ciudad del Cabo'], ['KwaZulu-Natal', 'Durban'], ['Cabo Oriental', 'East London'], ['Limpopo', 'Polokwane']],
+            'South Korea': [['Seúl', 'Seúl'], ['Busán', 'Busán'], ['Incheon', 'Incheon'], ['Gyeonggi', 'Suwon'], ['Jeolla del Sur', 'Muan']],
+            'South Sudan': [['Juba (Ecuatoria Central)', 'Yuba'], ['Ecuatoria Oriental', 'Torit'], ['Bahr el Ghazal del Norte', 'Aweil'], ['Alto Nilo', 'Malakal']],
+            'Spain': [['Madrid', 'Madrid'], ['Cataluña', 'Barcelona'], ['Andalucía', 'Sevilla'], ['Comunidad Valenciana', 'Valencia'], ['País Vasco', 'Vitoria']],
+            'Sri Lanka': [['Provincia Occidental', 'Sri Jayewardenepura Kotte'], ['Provincia Central', 'Kandy'], ['Provincia Meridional', 'Galle'], ['Provincia del Norte', 'Jaffna']],
+            'Sudan': [['Jartum', 'Jartum'], ['Jazira', 'Wad Madani'], ['Kordofán del Norte', 'El Obeid'], ['Darfur del Norte', 'El Fasher']],
+            'Suriname': [['Paramaribo', 'Paramaribo'], ['Wanica', 'Lelydorp'], ['Nickerie', 'Nieuw Nickerie'], ['Sipaliwini', 'Apoera']],
+            'Sweden': [['Estocolmo', 'Estocolmo'], ['Västra Götaland', 'Gotemburgo'], ['Escania', 'Malmö'], ['Uppsala', 'Upsala']],
+            'Switzerland': [['Zúrich', 'Zúrich'], ['Berna', 'Berna'], ['Ginebra', 'Ginebra'], ['Basilea-Ciudad', 'Basilea'], ['Tesino', 'Bellinzona']],
+            'Syria': [['Damasco', 'Damasco'], ['Alepo', 'Alepo'], ['Homs', 'Homs'], ['Hama', 'Hama'], ['Latakia', 'Latakia']],
+            'Taiwan': [['Taipéi', 'Taipéi'], ['Nuevo Taipéi', 'Nuevo Taipéi'], ['Kaohsiung', 'Kaohsiung'], ['Taichung', 'Taichung'], ['Tainan', 'Tainan']],
+            'Tajikistan': [['Dusambé', 'Dusambé'], ['Suğd', 'Khujand'], ['Khatlon', 'Bokhtar'], ['Alta Badajshán', 'Jorog']],
+            'United Republic of Tanzania': [['Dar es Salaam', 'Dar es Salaam'], ['Dodoma', 'Dodoma'], ['Mwanza', 'Mwanza'], ['Zanzíbar', 'Zanzíbar'], ['Arusha', 'Arusha']],
+            'Thailand': [['Bangkok', 'Bangkok'], ['Provincia de Chiang Mai', 'Chiang Mai'], ['Provincia de Phuket', 'Phuket'], ['Provincia de Pattaya (Chon Buri)', 'Chon Buri']],
+            'Togo': [['Región Marítima', 'Lomé'], ['Región de las Mesetas', 'Atakpamé'], ['Región Central', 'Sokodé'], ['Región de Kara', 'Kara'], ['Región de las Sabanas', 'Dapaong']],
+            'Tonga': [['Tongatapu', 'Nukualofa'], ['Vava\'u', 'Neiafu'], ['Ha\'apai', 'Pangai'], ['Eua', 'Ohonua']],
+            'Trinidad and Tobago': [['Corporación de Puerto España', 'Puerto España'], ['San Fernando', 'San Fernando'], ['Chaguanas', 'Chaguanas'], ['Arima', 'Arima'], ['Scarborough (Tobago)', 'Scarborough']],
+            'Tunisia': [['Gobernación de Túnez', 'Túnez'], ['Gobernación de Sfax', 'Sfax'], ['Gobernación de Susa', 'Susa'], ['Gobernación de Bizerte', 'Bizerta']],
+            'Turkey': [['Estambul', 'Estambul'], ['Ankara', 'Ankara'], ['Esmirna', 'Esmirna'], ['Antalya', 'Antalya'], ['Erzurum', 'Erzurum']],
+            'Turkmenistan': [['Asjabad', 'Asjabad'], ['Ahal', 'Anau'], ['Mary', 'Mary'], ['Dashoguz', 'Dashoguz']],
+            'Tuvalu': [['Funafuti', 'Funafuti'], ['Nanumea', 'Nanumea'], ['Nukufetau', 'Savave']],
+            'Uganda': [['Kampala', 'Kampala'], ['Distrito de Wakiso', 'Wakiso'], ['Distrito de Gulu', 'Gulu'], ['Distrito de Mbarara', 'Mbarara'], ['Distrito de Jinja', 'Jinja']],
+            'Ukraine': [['Kiev', 'Kiev'], ['Járkov', 'Járkov'], ['Odesa', 'Odesa'], ['Lviv', 'Lviv'], ['Dnipropetrovsk', 'Dnipró']],
+            'United Arab Emirates': [['Emirato de Abu Dabi', 'Abu Dabi'], ['Emirato de Dubái', 'Dubái'], ['Emirato de Sharjah', 'Sharjah'], ['Emirato de Ajmán', 'Ajmán']],
+            'United Kingdom': [['Inglaterra', 'Londres'], ['Escocia', 'Edimburgo'], ['Gales', 'Cardiff'], ['Irlanda del Norte', 'Belfast']],
+            'United States of America': [['California', 'Sacramento'], ['Texas', 'Austin'], ['Nueva York', 'Albany'], ['Florida', 'Tallahassee'], ['Alaska', 'Juneau']],
+            'Uruguay': [['Montevideo', 'Montevideo'], ['Canelones', 'Canelones'], ['Maldonado', 'Maldonado'], ['Salto', 'Salto'], ['Paysandú', 'Paysandú']],
+            'Uzbekistan': [['Taskent', 'Taskent'], ['Samarcanda', 'Samarcanda'], ['Bujará', 'Bujará'], ['Andiján', 'Andiján'], ['Ferganá', 'Ferganá']],
+            'Vanuatu': [['Provincia de Shefa', 'Port Vila'], ['Provincia de Tafea', 'Isangel'], ['Provincia de Sanma', 'Luganville'], ['Provincia de TORBA', 'Lolowai']],
+            'Vatican': [['Ciudad del Vaticano', 'Ciudad del Vaticano']],
+            'Venezuela': [['Distrito Capital', 'Caracas'], ['Miranda', 'Los Teques'], ['Zulia', 'Maracaibo'], ['Lara', 'Barquisimeto'], ['Aragua', 'Maracay']],
+            'Vietnam': [['Hanói', 'Hanói'], ['Ciudad Ho Chi Minh', 'Ciudad Ho Chi Minh'], ['Da Nang', 'Da Nang'], ['Hai Phong', 'Hai Phong'], ['Cần Thơ', 'Cần Thơ']],
+            'Yemen': [['Gobernación de Saná', 'Saná'], ['Gobernación de Adén', 'Adén'], ['Gobernación de Taiz', 'Taiz'], ['Gobernación de Hadramaut', 'Mukalla']],
+            'Zambia': [['Provincia de Lusaka', 'Lusaka'], ['Provincia de Copperbelt', 'Ndola'], ['Provincia del Norte', 'Kasama'], ['Provincia Occidental', 'Mongu']],
+            'Zimbabwe': [['Harare', 'Harare'], ['Provincia de Bulawayo', 'Bulawayo'], ['Provincia de Mashonalandia Oriental', 'Marondera'], ['Provincia de Matabelelandia del Norte', 'Hwange']],
+            'Argentina': [['Buenos Aires', 'La Plata'], ['Ciudad Autónoma de Buenos Aires', 'Buenos Aires'], ['Córdoba', 'Córdoba'], ['Santa Fe', 'Santa Fe'], ['Mendoza', 'Mendoza']],
+            'Australia': [['Nueva Gales del Sur', 'Sídney'], ['Victoria', 'Melbourne'], ['Queensland', 'Brisbane'], ['Australia Occidental', 'Perth'], ['Tasmania', 'Hobart']]
+        };
+
         const map = new maplibregl.Map({
             container: 'map',
             projection: 'globe',
@@ -704,10 +1042,24 @@
                 }, 'country-line');
             }
 
+            // Capa transparente para detectar clics en cualquier pais
+            // (no se filtra nunca: permite cambiar de pais sin cerrar el panel)
+            if (!map.getLayer('country-hit')) {
+                map.addLayer({
+                    id: 'country-hit',
+                    type: 'fill',
+                    source: 'countries',
+                    paint: {
+                        'fill-color': '#000000',
+                        'fill-opacity': 0.001
+                    }
+                }, 'country-line');
+            }
+
             // Click sobre el globo: identificar pais
             map.on('click', (e) => {
                 const features = map.queryRenderedFeatures(e.point, {
-                    layers: ['country-fill', 'country-borders', 'country-hover']
+                    layers: ['country-hit', 'country-fill', 'country-borders', 'country-hover', 'country-line']
                 });
                 if (features.length > 0) {
                     const props = features[0].properties;
@@ -811,6 +1163,8 @@
         }
 
         function selectCountry(name, props, lngLat) {
+            selectedName = name;
+            selectedColor = getNextColor();
             highlightCountry(name);
             const center = lngLat || { lng: 0, lat: 0 };
             showInfoPanel(name, props, center);
@@ -822,6 +1176,11 @@
             return code.toUpperCase().replace(/./g, (c) => String.fromCodePoint(127397 + c.charCodeAt(0)));
         }
 
+        function slugify(name) {
+            return (name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        }
+
         function getFoodData(name, props) {
             const base = comidaPorPais[name];
             if (base) {
@@ -829,13 +1188,14 @@
             }
             const extra = comidaExtra && comidaExtra[name];
             if (extra) {
+                const img = 'extra/' + slugify(name);
                 return {
                     has: true,
                     flag: flagFromISO(props ? props['ISO3166-1-Alpha-2'] : '') || '🌍',
                     capital: extra[0],
                     food: extra[1],
                     desc: extra[2],
-                    img: null
+                    img: img
                 };
             }
             return { has: false };
@@ -856,19 +1216,36 @@
             const foodBlock = document.getElementById('foodBlock');
             const foodSep = document.getElementById('foodSep');
             const photo = document.getElementById('foodPhoto');
+            const fallback = document.getElementById('foodCard');
+
+            photo.onerror = null;
+            photo.onload = null;
+
             if (comida.has) {
                 document.getElementById('foodFlag').textContent = comida.flag;
                 document.getElementById('foodTitle').textContent = '🍽️ ' + comida.food;
                 document.getElementById('foodCapital').textContent = '🏛️ Capital: ' + comida.capital;
+                document.getElementById('foodDesc').textContent = comida.desc;
+
+                const showFallback = (text) => {
+                    photo.style.display = 'none';
+                    fallback.style.display = 'flex';
+                    fallback.textContent = text;
+                    if (comida.flag) fallback.textContent = comida.flag + '\n' + comida.food;
+                    fallback.style.fontSize = '2rem';
+                };
+
                 if (comida.img) {
                     photo.src = 'img/' + comida.img + '.jpg';
                     photo.alt = 'Foto de ' + comida.food;
-                    photo.style.display = 'block';
+                    photo.onload = () => {
+                        photo.style.display = 'block';
+                        fallback.style.display = 'none';
+                    };
+                    photo.onerror = () => showFallback(comida.food);
                 } else {
-                    photo.removeAttribute('src');
-                    photo.style.display = 'none';
+                    showFallback(comida.food);
                 }
-                document.getElementById('foodDesc').textContent = comida.desc;
                 foodBlock.style.display = 'block';
                 foodSep.style.display = '';
             } else {
@@ -883,6 +1260,34 @@
             document.getElementById('infoPanel').classList.remove('active');
             resetHighlight();
             selectedName = null;
+        }
+
+        // ====== Vista "Ver mas": regiones internas del pais ======
+        function openRegionsView() {
+            const name = selectedName;
+            if (!name || !regionesPorPais[name]) return;
+            const regiones = regionesPorPais[name];
+            const display = nombreEspanol[name] || name;
+            document.getElementById('regionsTitle').textContent = 'Regiones de ' + display;
+            document.getElementById('regionsSub').textContent = 'Divisiones internas principales';
+            const grid = document.getElementById('regionsGrid');
+            grid.innerHTML = '';
+            regiones.forEach(r => {
+                const div = document.createElement('div');
+                div.className = 'region-item';
+                div.innerHTML = '<b>' + r[0] + '</b><small>Capital regional: ' + r[1] + '</small>';
+                grid.appendChild(div);
+            });
+            if (regiones.length === 0) {
+                grid.innerHTML = '<div class="region-item"><b>Sin datos de regiones</b></div>';
+            }
+            document.getElementById('regionsNote').textContent =
+                'Datos aproximados de las principales regiones de ' + display + '.';
+            document.getElementById('regionsOverlay').classList.add('active');
+        }
+
+        function closeRegionsView() {
+            document.getElementById('regionsOverlay').classList.remove('active');
         }
 
         // ====== Busqueda ======

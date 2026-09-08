@@ -1,0 +1,17 @@
+[
+  {
+    "key": "Nigeria",
+    "status": "error",
+    "msg": "Error: rate limited 429"
+  },
+  {
+    "key": "Portugal",
+    "status": "error",
+    "msg": "Error: rate limited 429"
+  },
+  {
+    "key": "Uruguay",
+    "status": "error",
+    "msg": "Error: rate limited 429"
+  }
+]
