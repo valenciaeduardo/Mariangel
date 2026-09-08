@@ -346,47 +346,44 @@
             font-size: 11px;
         }
 
-        /* ===== Vista foto a pantalla completa (lightbox) ===== */
+        /* ===== Vista de foto ampliada con panel informativo derecho ===== */
         .photo-overlay {
             position: fixed;
             inset: 0;
             z-index: 2500;
-            background: rgba(0, 0, 10, 0.94);
-            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 10, 0.5);
             display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            cursor: zoom-out;
+            cursor: default;
         }
 
         .photo-overlay.active {
-            display: flex;
+            display: block;
         }
 
         .photo-stage {
             display: flex;
-            gap: 22px;
+            gap: 0;
             width: 100%;
-            max-width: 1400px;
-            max-height: 92vh;
+            height: 100%;
             align-items: center;
         }
 
         .photo-frame {
-            flex: 1 1 55%;
+            flex: 1 1 auto;
             min-width: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
+            padding: 24px;
+            cursor: zoom-out;
         }
 
         .photo-overlay .photo-full {
             max-width: 100%;
-            max-height: 86vh;
+            max-height: 88vh;
             border-radius: 12px;
-            border: 2px solid rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.25);
             box-shadow: 0 20px 70px rgba(0, 0, 0, 0.8);
             object-fit: contain;
             background: #000;
@@ -394,7 +391,7 @@
 
         .photo-overlay .photo-caption {
             position: absolute;
-            bottom: -4px;
+            bottom: 8px;
             left: 0;
             right: 0;
             text-align: center;
@@ -403,22 +400,18 @@
             font-weight: 700;
             text-shadow: 0 1px 6px rgba(0,0,0,0.9);
             padding: 0 20px;
-            background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
-            border-radius: 0 0 12px 12px;
-            line-height: 2.2;
         }
 
         .photo-panel {
-            flex: 1 1 45%;
-            min-width: 0;
-            max-height: 86vh;
+            flex: 0 0 420px;
+            width: 420px;
+            height: 100vh;
             overflow-y: auto;
-            background: rgba(12, 14, 40, 0.97);
-            border: 1px solid rgba(79, 195, 247, 0.35);
-            border-radius: 16px;
-            padding: 20px 22px;
+            background: rgba(12, 14, 40, 0.98);
+            border-left: 1px solid rgba(79, 195, 247, 0.35);
+            padding: 24px 22px 30px 22px;
             color: #fff;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            box-shadow: -12px 0 40px rgba(0, 0, 0, 0.55);
             scrollbar-width: thin;
             scrollbar-color: rgba(79,195,247,0.4) transparent;
         }
@@ -469,18 +462,20 @@
             margin-top: 14px;
             color: rgba(255,255,255,0.4);
             font-size: 11px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 12px;
         }
 
         .photo-overlay .photo-close {
             position: fixed;
             top: 14px;
-            right: 22px;
+            right: 24px;
             cursor: pointer;
-            color: rgba(255,255,255,0.7);
-            font-size: 34px;
+            color: rgba(255,255,255,0.85);
+            font-size: 32px;
             line-height: 1;
             transition: color 0.2s ease;
-            z-index: 10;
+            z-index: 2600;
         }
 
         .photo-overlay .photo-close:hover {
@@ -490,39 +485,47 @@
         @media (max-width: 900px) {
             .photo-stage {
                 flex-direction: column;
-                overflow-y: auto;
-                max-height: 92vh;
             }
             .photo-frame {
-                flex: none;
-                width: 100%;
+                flex: 1 1 auto;
+                min-height: 40vh;
+                padding: 12px;
             }
             .photo-overlay .photo-full {
-                max-height: 45vh;
+                max-height: 40vh;
             }
             .photo-panel {
-                flex: none;
+                flex: 1 1 auto;
                 width: 100%;
-                max-height: 40vh;
+                max-width: 100%;
+                height: 55vh;
+                min-height: 300px;
+                border-left: none;
+                border-top: 1px solid rgba(79,195,247,0.35);
             }
         }
 
         .title-bar {
             position: fixed;
-            top: 10px;
-            right: 16px;
-            z-index: 999;
-            padding: 0;
-            text-align: right;
+            top: 18px;
+            left: 20px;
+            z-index: 1000;
+            padding: 10px 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 25px;
+            background: rgba(10, 10, 30, 0.85);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             pointer-events: none;
         }
 
         .title-bar h1 {
-            font-size: 13px;
-            color: rgba(255,255,255,0.65);
-            font-weight: 500;
+            font-size: 14px;
+            color: #fff;
+            font-weight: 600;
             letter-spacing: 3px;
             text-transform: uppercase;
+            text-align: center;
         }
 
         .hint {
@@ -580,11 +583,36 @@
 
     <div class="photo-overlay" id="photoOverlay">
         <span class="photo-close" onclick="closePhotoView()">&times;</span>
-        <img class="photo-full" id="photoFullImg" alt="Foto de la comida en pantalla completa" />
-        <div class="photo-caption" id="photoCaption"></div>
+        <div class="photo-stage">
+            <div class="photo-frame">
+                <img class="photo-full" id="photoFullImg" alt="Foto de la comida" />
+                <div class="photo-caption" id="photoCaption"></div>
+            </div>
+            <div class="photo-panel" id="photoPanel">
+                <h2 id="photoDishTitle"></h2>
+                <div class="detail-sec">
+                    <h3>Descripción</h3>
+                    <p id="photoDesc"></p>
+                </div>
+                <div class="detail-sec" id="photoIngSec">
+                    <h3>Ingredientes</h3>
+                    <ul id="photoIng"></ul>
+                </div>
+                <div class="detail-sec" id="photoCocSec">
+                    <h3>Cocción y preparación</h3>
+                    <p id="photoCoc"></p>
+                </div>
+                <div class="detail-sec" id="photoHisSec">
+                    <h3>Historia</h3>
+                    <p id="photoHis"></p>
+                </div>
+                <div class="detail-note" id="photoNote"></div>
+            </div>
+        </div>
     </div>
 
     <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <script src="comida-detalle.js"></script>
     <script>
         // ====== Gastronomia del mundo (base de datos de comidas por pais) ======
         const comidaPorPais = {
@@ -1462,7 +1490,7 @@
             document.getElementById('regionsOverlay').classList.remove('active');
         }
 
-        // ====== Vista de foto a pantalla completa (lightbox) ======
+        // ====== Vista de foto ampliada con panel informativo derecho ======
         function openPhotoView() {
             const photo = document.getElementById('foodPhoto');
             const capt = document.getElementById('foodTitle');
@@ -1470,6 +1498,32 @@
             document.getElementById('photoFullImg').src = photo.src;
             document.getElementById('photoFullImg').alt = photo.alt || 'Foto de la comida';
             document.getElementById('photoCaption').textContent = capt.textContent || '';
+
+            const detalle = (window.comidaDetalle && comidaDetalle && comidaDetalle[selectedName]) ? comidaDetalle[selectedName] : null;
+            const baseDesc = (getFoodData(selectedName, {}).desc) || '';
+            document.getElementById('photoDishTitle').textContent = capt.textContent || '';
+            document.getElementById('photoDesc').textContent = (detalle && detalle.desc) || baseDesc;
+            document.getElementById('photoCoc').textContent = (detalle && detalle.coc) || '';
+            document.getElementById('photoHis').textContent = (detalle && detalle.his) || '';
+
+            const ing = (detalle && detalle.ing) || [];
+            const list = document.getElementById('photoIng');
+            list.innerHTML = '';
+            if (ing.length) {
+                ing.forEach(i => {
+                    const li = document.createElement('li');
+                    li.textContent = i;
+                    list.appendChild(li);
+                });
+                document.getElementById('photoIngSec').style.display = '';
+            } else {
+                document.getElementById('photoIngSec').style.display = 'none';
+            }
+            document.getElementById('photoCocSec').style.display = (detalle && detalle.coc) ? '' : 'none';
+            document.getElementById('photoHisSec').style.display = (detalle && detalle.his) ? '' : 'none';
+            document.getElementById('photoNote').textContent =
+                (detalle) ? 'Información general del plato, aproximada.' : '';
+
             document.getElementById('photoOverlay').classList.add('active');
         }
 
@@ -1478,7 +1532,9 @@
         }
 
         document.getElementById('photoOverlay').addEventListener('click', (ev) => {
-            if (ev.target === document.getElementById('photoOverlay')) closePhotoView();
+            if (ev.target === document.getElementById('photoOverlay') ||
+                ev.target.classList.contains('photo-stage') ||
+                ev.target.classList.contains('photo-frame')) closePhotoView();
         });
         document.addEventListener('keydown', (ev) => {
             if (ev.key === 'Escape') {
